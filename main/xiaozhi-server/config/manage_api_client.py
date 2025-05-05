@@ -84,7 +84,7 @@ class ManageApiClient:
         """判断异常是否应该重试"""
         # 网络连接相关错误
         if isinstance(
-            exception, (httpx.ConnectError, httpx.TimeoutException, httpx.NetworkError)
+                exception, (httpx.ConnectError, httpx.TimeoutException, httpx.NetworkError)
         ):
             return True
 
@@ -131,7 +131,7 @@ def get_server_config() -> Optional[Dict]:
 
 
 def get_agent_models(
-    mac_address: str, client_id: str, selected_module: Dict
+        mac_address: str, client_id: str, selected_module: Dict
 ) -> Optional[Dict]:
     """获取代理模型配置"""
     return ManageApiClient._instance._execute_request(
@@ -176,3 +176,17 @@ def init_service(config):
 
 def manage_api_http_safe_close():
     ManageApiClient.safe_close()
+
+
+def save_chat_server(msgs, device_id: str, selected_module: Dict):
+    """保存聊天记录到服务端"""
+    return ManageApiClient._instance._execute_request(
+        "POST",
+        "/chat/save_history",
+        json={
+            "secret": ManageApiClient._secret,
+            "msgs": msgs,
+            "deviceId": device_id,
+            "selectedModule": selected_module
+        },
+    )

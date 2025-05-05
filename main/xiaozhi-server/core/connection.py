@@ -31,6 +31,8 @@ from config.manage_api_client import DeviceNotFoundException, DeviceBindExceptio
 from core.utils.output_counter import add_device_output
 from core.handle.ttsReportHandle import enqueue_tts_report, report_tts
 
+from core.providers.history.db_history.db_history import DbHistoryProvider
+
 TAG = __name__
 
 auto_import_modules("plugins_func.functions")
@@ -42,6 +44,7 @@ class TTSException(RuntimeError):
 
 class ConnectionHandler:
     def __init__(
+<<<<<<< Updated upstream
         self,
         config: Dict[str, Any],
         _vad,
@@ -51,6 +54,9 @@ class ConnectionHandler:
         _memory,
         _intent,
         server=None,
+=======
+            self, config: Dict[str, Any], _vad, _asr, _llm, _tts, _memory, _intent
+>>>>>>> Stashed changes
     ):
         self.config = config
         self.server = server
@@ -117,6 +123,9 @@ class ConnectionHandler:
         self.iot_descriptors = {}
         self.func_handler = None
 
+        # history相关变量
+        self.history = DbHistoryProvider(config)
+
         self.cmd_exit = self.config["exit_commands"]
         self.max_cmd_length = 0
         for cmd in self.cmd_exit:
@@ -128,7 +137,7 @@ class ConnectionHandler:
 
         self.timeout_task = None
         self.timeout_seconds = (
-            int(self.config.get("close_connection_no_voice_time", 120)) + 60
+                int(self.config.get("close_connection_no_voice_time", 120)) + 60
         )  # 在原来第一道关闭的基础上加60秒，进行二道关闭
 
     async def handle_connection(self, ws):
@@ -213,6 +222,7 @@ class ConnectionHandler:
         """保存记忆并关闭连接"""
         try:
             await self.memory.save_memory(self.dialogue.dialogue)
+            await self.history.save_chat_history(self.dialogue.dialogue)
         except Exception as e:
             self.logger.bind(tag=TAG).error(f"保存记忆失败: {e}")
         finally:
@@ -313,6 +323,7 @@ class ConnectionHandler:
         self._initialize_memory()
         """加载意图识别"""
         self._initialize_intent()
+<<<<<<< Updated upstream
         """初始化上报线程"""
         self._init_report_threads()
 
@@ -326,6 +337,10 @@ class ConnectionHandler:
             )
             self.tts_report_thread.start()
             self.logger.bind(tag=TAG).info("TTS上报线程已启动")
+=======
+        """初始化对话历史"""
+        self._initialize_history()
+>>>>>>> Stashed changes
 
     def _initialize_private_config(self):
         """如果是从配置文件获取，则进行二次实例化"""
@@ -453,10 +468,14 @@ class ConnectionHandler:
         """初始化记忆模块"""
         self.memory.init_memory(self.device_id, self.llm)
 
+    def _initialize_history(self):
+        device_id = self.headers.get("device-id", None)
+        self.history.init_history(device_id, self.llm)
+
     def _initialize_intent(self):
         if (
-            self.config["Intent"][self.config["selected_module"]["Intent"]]["type"]
-            == "function_call"
+                self.config["Intent"][self.config["selected_module"]["Intent"]]["type"]
+                == "function_call"
         ):
             self.use_function_call_mode = True
         """初始化意图识别模块"""
@@ -900,9 +919,9 @@ class ConnectionHandler:
                     # 如果没有中途打断就发送语音
                     self.audio_play_queue.put((opus_datas, text, text_index))
                 if (
-                    self.tts.delete_audio_file
-                    and tts_file is not None
-                    and os.path.exists(tts_file)
+                        self.tts.delete_audio_file
+                        and tts_file is not None
+                        and os.path.exists(tts_file)
                 ):
                     os.remove(tts_file)
             except Exception as e:
