@@ -458,11 +458,6 @@ class ConnectionHandler:
     def _initialize_memory(self):
         """初始化记忆模块"""
         self.memory.init_memory(self.device_id, self.llm)
-
-    def _initialize_history(self):
-        device_id = self.headers.get("device-id", None)
-        self.history.init_history(device_id, self.llm)
-
     def _initialize_intent(self):
         if (
                 self.config["Intent"][self.config["selected_module"]["Intent"]]["type"]

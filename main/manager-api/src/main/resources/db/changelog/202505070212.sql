@@ -53,6 +53,4 @@ INSERT INTO `ai_agent_template` VALUES ('e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b2', '小
 
 ', 'zh', '中文', 4,  NULL, NULL, NULL, NULL);
 
-
-
-INSERT INTO `ai_model_config` VALUES ('TTS_DoubaoTTS', 'TTS', 'DoubaoTTS', '豆包语音合成', 0, 1, '{\"type\": \"doubao\", \"api_url\": \"https://openspeech.bytedance.com/api/v1/tts\", \"voice\": \"BV001_streaming\", \"output_dir\": \"tmp/\", \"authorization\": \"Bearer;\", \"appid\": \"6688255122\", \"access_token\": \"vz7HbjK6RBJF1asQlRaNA3k_E6Vnvw5a\", \"cluster\": \"volcano_tts\"}', NULL, NULL, 2, NULL, NULL, NULL, NULL);
+update ai_model_config set config_json = '{\"type\": \"doubao\", \"api_url\": \"https://openspeech.bytedance.com/api/v1/tts\", \"voice\": \"BV001_streaming\", \"output_dir\": \"tmp/\", \"authorization\": \"Bearer;\", \"appid\": \"6688255122\", \"access_token\": \"vz7HbjK6RBJF1asQlRaNA3k_E6Vnvw5a\", \"cluster\": \"volcano_tts\"}' where id='TTS_DoubaoTTS';
