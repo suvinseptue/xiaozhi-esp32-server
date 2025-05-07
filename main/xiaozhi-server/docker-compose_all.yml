@@ -64,6 +64,9 @@ services:
       - default
     expose:
       - 3306
+    ports:
+      # DB 控制台
+      - "23306:3306"
     volumes:
       - ./mysql/data:/var/lib/mysql
     environment:
