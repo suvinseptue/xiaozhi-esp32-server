@@ -4,7 +4,7 @@ version: '3'
 services:
   # Server模块
   xiaozhi-esp32-server:
-    image: registry.cn-hangzhou.aliyuncs.com/suvin/xiaozhi-esp32-server:latest
+    image: registry.cn-hangzhou.aliyuncs.com/suvin/xiaozhi-esp32-server:server_latest
     container_name: xiaozhi-esp32-server
     depends_on:
       - xiaozhi-esp32-server-db
