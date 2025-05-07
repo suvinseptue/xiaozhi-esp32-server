@@ -31,8 +31,6 @@ from config.manage_api_client import DeviceNotFoundException, DeviceBindExceptio
 from core.utils.output_counter import add_device_output
 from core.handle.ttsReportHandle import enqueue_tts_report, report_tts
 
-from core.providers.history.db_history.db_history import DbHistoryProvider
-
 TAG = __name__
 
 auto_import_modules("plugins_func.functions")
