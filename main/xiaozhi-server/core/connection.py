@@ -117,9 +117,6 @@ class ConnectionHandler:
         self.iot_descriptors = {}
         self.func_handler = None
 
-        # history相关变量
-        self.history = DbHistoryProvider(config)
-
         self.cmd_exit = self.config["exit_commands"]
         self.max_cmd_length = 0
         for cmd in self.cmd_exit:
