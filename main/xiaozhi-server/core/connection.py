@@ -44,7 +44,6 @@ class TTSException(RuntimeError):
 
 class ConnectionHandler:
     def __init__(
-<<<<<<< Updated upstream
         self,
         config: Dict[str, Any],
         _vad,
@@ -54,9 +53,6 @@ class ConnectionHandler:
         _memory,
         _intent,
         server=None,
-=======
-            self, config: Dict[str, Any], _vad, _asr, _llm, _tts, _memory, _intent
->>>>>>> Stashed changes
     ):
         self.config = config
         self.server = server
@@ -323,7 +319,6 @@ class ConnectionHandler:
         self._initialize_memory()
         """加载意图识别"""
         self._initialize_intent()
-<<<<<<< Updated upstream
         """初始化上报线程"""
         self._init_report_threads()
 
@@ -337,10 +332,6 @@ class ConnectionHandler:
             )
             self.tts_report_thread.start()
             self.logger.bind(tag=TAG).info("TTS上报线程已启动")
-=======
-        """初始化对话历史"""
-        self._initialize_history()
->>>>>>> Stashed changes
 
     def _initialize_private_config(self):
         """如果是从配置文件获取，则进行二次实例化"""
