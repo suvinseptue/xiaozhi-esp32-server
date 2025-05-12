@@ -54,3 +54,22 @@ INSERT INTO `ai_agent_template` VALUES ('e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b2', '小
 ', 'zh', '中文', 4,  NULL, NULL, NULL, NULL);
 
 update ai_model_config set config_json = '{\"type\": \"doubao\", \"api_url\": \"https://openspeech.bytedance.com/api/v1/tts\", \"voice\": \"BV001_streaming\", \"output_dir\": \"tmp/\", \"authorization\": \"Bearer;\", \"appid\": \"6688255122\", \"access_token\": \"vz7HbjK6RBJF1asQlRaNA3k_E6Vnvw5a\", \"cluster\": \"volcano_tts\"}' where id='TTS_DoubaoTTS';
+
+update ai_model_config set config_json = '{\"type\": \"siliconflow\", \"model\": \"FunAudioLLM/CosyVoice2-0.5B\", \"voice\": \"FunAudioLLM/CosyVoice2-0.5B:alex\", \"output_dir\": \"tmp/\", \"access_token\": \"sk-gcjodbzlrfghtovrrbqkfqikjgagimufiicowewqwlkbddul\", \"response_format\": \"wav\"}' where id='TTS_CosyVoiceSiliconflow';
+
+INSERT INTO `ai_tts_voice` VALUES ('TTS_CosyVoiceSiliconflow0003', 'TTS_CosyVoiceSiliconflow', 'CosyVoice慵懒女声', 'speech:ss_1:mb30kqltfb:qmtzvuswryrickyzqolj', '中文', NULL, NULL, 6, NULL, NULL, NULL, NULL);
+delete from `ai_tts_voice` where id='TTS_CosyVoiceSiliconflow0007';
+INSERT INTO `ai_tts_voice` VALUES ('TTS_CosyVoiceSiliconflow0007', 'TTS_CosyVoiceSiliconflow', '熊二小时候', 'speech:xionger_child:mb30kqltfb:nqapmfgnewkdjurtrafj', '中文', NULL, NULL, 6, NULL, NULL, NULL, NULL);
+delete from `ai_tts_voice` where id='TTS_CosyVoiceSiliconflow0005';
+INSERT INTO `ai_tts_voice` VALUES ('TTS_CosyVoiceSiliconflow0005', 'TTS_CosyVoiceSiliconflow', '太乙真人', 'speech:taiyizhenren:mb30kqltfb:sdatwdoizkjogpqijijf', '中文', NULL, NULL, 6, NULL, NULL, NULL, NULL);
+
+delete from `ai_tts_voice` where id='TTS_CosyVoiceSiliconflow0004';
+INSERT INTO `ai_tts_voice` VALUES ('TTS_CosyVoiceSiliconflow0004', 'TTS_CosyVoiceSiliconflow', '猴哥', 'speech:houge:mb30kqltfb:vjrylggmmpdhfokujrkb', '中文', NULL, NULL, 6, NULL, NULL, NULL, NULL);
+delete from `ai_tts_voice` where id='TTS_CosyVoiceSiliconflow0006';
+INSERT INTO `ai_tts_voice` VALUES ('TTS_CosyVoiceSiliconflow0006', 'TTS_CosyVoiceSiliconflow', '熊二', 'speech:xionger:mb30kqltfb:zydjyrujzkdkofgkidwx', '中文', NULL, NULL, 6, NULL, NULL, NULL, NULL);
+delete from `ai_tts_voice` where id='TTS_CosyVoiceSiliconflow1008';
+INSERT INTO `ai_tts_voice` VALUES ('TTS_CosyVoiceSiliconflow1008', 'TTS_CosyVoiceSiliconflow', '佩奇', 'speech:peiqi:mb30kqltfb:yryulxqkbkqcfxmbubti', '中文', NULL, NULL, 6, NULL, NULL, NULL, NULL);
+delete from `ai_tts_voice` where id='TTS_CosyVoiceSiliconflow1009';
+INSERT INTO `ai_tts_voice` VALUES ('TTS_CosyVoiceSiliconflow1009', 'TTS_CosyVoiceSiliconflow', '天才儿童','speech:tiancaiertong:mb30kqltfb:ihgpletzitogdxdinfup', '中文', NULL, NULL, 6, NULL, NULL, NULL, NULL);
+delete from `ai_tts_voice` where id='TTS_CosyVoiceSiliconflow1010';
+INSERT INTO `ai_tts_voice` VALUES ('TTS_CosyVoiceSiliconflow1010', 'TTS_CosyVoiceSiliconflow', '萌丫头','speech:mengyatou:mb30kqltfb:uwadvquigcosfljkxghu', '中文', NULL, NULL, 6, NULL, NULL, NULL, NULL);

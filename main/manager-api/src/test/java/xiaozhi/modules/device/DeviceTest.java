@@ -46,5 +46,6 @@ public class DeviceTest {
         Assertions.assertEquals(macAddress, savedMacAddress, "保存的MAC地址与原始MAC地址不匹配");
 
         log.info("测试完成");
+
     }
 }
