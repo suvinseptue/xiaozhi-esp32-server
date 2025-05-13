@@ -498,6 +498,7 @@ class ConnectionHandler:
             llm_responses = self.llm.response(
                 self.session_id, self.dialogue.get_llm_dialogue_with_memory(memory_str)
             )
+            self.logger.bind(tag=TAG).debug("LLM返回结束")
         except Exception as e:
             self.logger.bind(tag=TAG).error(f"LLM 处理出错 {query}: {e}")
             return None
@@ -536,9 +537,11 @@ class ConnectionHandler:
                     #     segment_text = " "
                     text_index += 1
                     self.recode_first_last_text(segment_text, text_index)
+                    self.logger.bind(tag=TAG).debug("[DEBUG]开始TTS口播")
                     future = self.executor.submit(
                         self.speak_and_play, segment_text, text_index
                     )
+                    self.logger.bind(tag=TAG).debug("[DEBUG]结束TTS口播")
                     self.tts_queue.put((future, text_index))
                     processed_chars += len(segment_text_raw)  # 更新已处理字符位置
 
