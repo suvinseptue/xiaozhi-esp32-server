@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import lombok.AllArgsConstructor;
+import xiaozhi.common.constant.Constant;
 import xiaozhi.common.exception.ErrorCode;
 import xiaozhi.common.exception.RenException;
 import xiaozhi.common.redis.RedisKeys;
@@ -61,15 +62,15 @@ public class ConfigServiceImpl implements ConfigService {
 
         // 构建模块配置
         buildModuleConfig(
-                agent.getAgentName(),
+                null,
                 null,
                 null,
                 agent.getVadModelId(),
                 agent.getAsrModelId(),
-                agent.getLlmModelId(),
-                agent.getTtsModelId(),
-                agent.getMemModelId(),
-                agent.getIntentModelId(),
+                null,
+                null,
+                null,
+                null,
                 result,
                 isCache);
 
@@ -108,6 +109,17 @@ public class ConfigServiceImpl implements ConfigService {
         // 获取单台设备每天最多输出字数
         String deviceMaxOutputSize = sysParamsService.getValue("device_max_output_size", true);
         result.put("device_max_output_size", deviceMaxOutputSize);
+
+        // 获取聊天记录配置
+        Integer chatHistoryConf = agent.getChatHistoryConf();
+        if (agent.getMemModelId() != null && agent.getMemModelId().equals(Constant.MEMORY_NO_MEM)) {
+            chatHistoryConf = Constant.ChatHistoryConfEnum.IGNORE.getCode();
+        } else if (agent.getMemModelId() != null
+                && !agent.getMemModelId().equals(Constant.MEMORY_NO_MEM)
+                && agent.getChatHistoryConf() == null) {
+            chatHistoryConf = Constant.ChatHistoryConfEnum.RECORD_TEXT_AUDIO.getCode();
+        }
+        result.put("chat_history_conf", chatHistoryConf);
         // 如果客户端已实例化模型，则不返回
         String alreadySelectedVadModelId = (String) selectedModule.get("VAD");
         if (alreadySelectedVadModelId != null && alreadySelectedVadModelId.equals(agent.getVadModelId())) {
@@ -116,18 +128,6 @@ public class ConfigServiceImpl implements ConfigService {
         String alreadySelectedAsrModelId = (String) selectedModule.get("ASR");
         if (alreadySelectedAsrModelId != null && alreadySelectedAsrModelId.equals(agent.getAsrModelId())) {
             agent.setAsrModelId(null);
-        }
-        String alreadySelectedLlmModelId = (String) selectedModule.get("LLM");
-        if (alreadySelectedLlmModelId != null && alreadySelectedLlmModelId.equals(agent.getLlmModelId())) {
-            agent.setLlmModelId(null);
-        }
-        String alreadySelectedMemModelId = (String) selectedModule.get("Memory");
-        if (alreadySelectedMemModelId != null && alreadySelectedMemModelId.equals(agent.getMemModelId())) {
-            agent.setMemModelId(null);
-        }
-        String alreadySelectedIntentModelId = (String) selectedModule.get("Intent");
-        if (alreadySelectedIntentModelId != null && alreadySelectedIntentModelId.equals(agent.getIntentModelId())) {
-            agent.setIntentModelId(null);
         }
 
         // 构建模块配置
@@ -269,7 +269,8 @@ public class ConfigServiceImpl implements ConfigService {
                         if (intentLLMModelId != null && intentLLMModelId.equals(llmModelId)) {
                             intentLLMModelId = null;
                         }
-                    } else if ("function_call".equals(map.get("type"))) {
+                    }
+                    if (map.get("functions") != null) {
                         String functionStr = (String) map.get("functions");
                         if (StringUtils.isNotBlank(functionStr)) {
                             String[] functions = functionStr.split("\\;");
