@@ -73,3 +73,6 @@ delete from `ai_tts_voice` where id='TTS_CosyVoiceSiliconflow1009';
 INSERT INTO `ai_tts_voice` VALUES ('TTS_CosyVoiceSiliconflow1009', 'TTS_CosyVoiceSiliconflow', '天才儿童','speech:tiancaiertong:mb30kqltfb:ihgpletzitogdxdinfup', '中文', NULL, NULL, 6, NULL, NULL, NULL, NULL);
 delete from `ai_tts_voice` where id='TTS_CosyVoiceSiliconflow1010';
 INSERT INTO `ai_tts_voice` VALUES ('TTS_CosyVoiceSiliconflow1010', 'TTS_CosyVoiceSiliconflow', '萌丫头','speech:mengyatou:mb30kqltfb:uwadvquigcosfljkxghu', '中文', NULL, NULL, 6, NULL, NULL, NULL, NULL);
+
+
+update ai_model_config set config_json = '{\"type\": \"openai\", \"base_url\": \"https://dashscope.aliyuncs.com/compatible-mode/v1\", \"model_name\": \"qwen-turbo\", \"api_key\": \"sk-1642cb7d39824ae4b77602848e22ff35\", \"temperature\": 0.7, \"max_tokens\": 500, \"top_p\": 1, \"top_k\": 50, \"frequency_penalty\": 0}'
