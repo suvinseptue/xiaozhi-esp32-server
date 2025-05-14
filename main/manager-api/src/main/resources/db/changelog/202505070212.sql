@@ -75,4 +75,9 @@ delete from `ai_tts_voice` where id='TTS_CosyVoiceSiliconflow1010';
 INSERT INTO `ai_tts_voice` VALUES ('TTS_CosyVoiceSiliconflow1010', 'TTS_CosyVoiceSiliconflow', '萌丫头','speech:mengyatou:mb30kqltfb:uwadvquigcosfljkxghu', '中文', NULL, NULL, 6, NULL, NULL, NULL, NULL);
 
 
-update ai_model_config set config_json = '{\"type\": \"openai\", \"base_url\": \"https://dashscope.aliyuncs.com/compatible-mode/v1\", \"model_name\": \"qwen-turbo\", \"api_key\": \"sk-1642cb7d39824ae4b77602848e22ff35\", \"temperature\": 0.7, \"max_tokens\": 500, \"top_p\": 1, \"top_k\": 50, \"frequency_penalty\": 0}'
+update ai_model_config set config_json = '{\"type\": \"openai\", \"base_url\": \"https://dashscope.aliyuncs.com/compatible-mode/v1\", \"model_name\": \"qwen-turbo\", \"api_key\": \"sk-1642cb7d39824ae4b77602848e22ff35\", \"temperature\": 0.7, \"max_tokens\": 500, \"top_p\": 1, \"top_k\": 50, \"frequency_penalty\": 0}' where id='LLM_AliLLM';
+
+
+update `ai_model_config` set config_json='{\"type\": \"openai\", \"model_name\": \"glm-4-flash\", \"base_url\": \"https://open.bigmodel.cn/api/paas/v4/\", \"api_key\": \"616f4cdca4d64f279b4ff9e6bae58470.FuYnwkCBbApJcn75\"}' where id='LLM_ChatGLMLLM';
+
+update `ai_model_config` set config_json='{\"type\": \"openai\", \"base_url\": \"https://ark.cn-beijing.volces.com/api/v3\", \"model_name\": \"doubao-pro-32k-functioncall-241028\", \"api_key\": \"3f335a9e-ad91-48d2-bc5c-683750f7b356\"}' where id='LLM_DoubaoLLM';

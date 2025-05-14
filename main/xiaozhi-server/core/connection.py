@@ -537,11 +537,9 @@ class ConnectionHandler:
                     #     segment_text = " "
                     text_index += 1
                     self.recode_first_last_text(segment_text, text_index)
-                    self.logger.bind(tag=TAG).debug("[DEBUG]开始TTS口播")
                     future = self.executor.submit(
                         self.speak_and_play, segment_text, text_index
                     )
-                    self.logger.bind(tag=TAG).debug("[DEBUG]结束TTS口播")
                     self.tts_queue.put((future, text_index))
                     processed_chars += len(segment_text_raw)  # 更新已处理字符位置
 

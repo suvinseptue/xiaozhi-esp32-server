@@ -11,7 +11,6 @@ TAG = __name__
 
 
 async def handleAudioMessage(conn, audio):
-    conn.logger.bind(tag=TAG).info("[DEBUG]接收到语音消息")
     if conn.vad is None:
         return
     if not conn.asr_server_receive:
@@ -22,7 +21,6 @@ async def handleAudioMessage(conn, audio):
     else:
         have_voice = conn.client_have_voice
 
-    conn.logger.bind(tag=TAG).info(f"[DEBUG]识别是否有声音：{conn.client_have_voice}；声音是否停止：{conn.client_voice_stop}")
 
     # 如果本次没有声音，本段也没声音，就把声音丢弃了
     if have_voice == False and conn.client_have_voice == False:
@@ -43,7 +41,6 @@ async def handleAudioMessage(conn, audio):
         if len(conn.asr_audio) < 15:
             conn.asr_server_receive = True
         else:
-            conn.logger.bind(tag=TAG).info("[DEBUG]开始识别文本：")
             text, _ = await conn.asr.speech_to_text(conn.asr_audio, conn.session_id)
             conn.logger.bind(tag=TAG).info(f"识别文本: {text}")
             text_len, _ = remove_punctuation_and_length(text)

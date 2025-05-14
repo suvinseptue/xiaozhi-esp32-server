@@ -1,4 +1,5 @@
 import openai
+import time
 from openai.types import CompletionUsage
 from config.logger import setup_logging
 from core.utils.util import check_model_key
@@ -31,11 +32,15 @@ class LLMProvider(LLMProviderBase):
 
     def response(self, session_id, dialogue):
         try:
+            start_time = time.time()
             responses = self.client.chat.completions.create(
                 model=self.model_name,
                 messages=dialogue,
                 stream=True,
                 max_tokens=self.max_tokens,
+            )
+            logger.bind(tag=TAG).debug(
+                f"LLM对话耗时: {time.time() - start_time:.3f}s "
             )
 
             is_active = True

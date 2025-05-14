@@ -52,9 +52,7 @@ async def analyze_intent_with_llm(conn, text):
     # 对话历史记录
     dialogue = conn.dialogue
     try:
-        conn.logger.bind(tag=TAG).info("[DEBUG]意图识别开始")
         intent_result = await conn.intent.detect_intent(conn, dialogue.dialogue, text)
-        conn.logger.bind(tag=TAG).info("[DEBUG]意图识别结束")
         return intent_result
     except Exception as e:
         conn.logger.bind(tag=TAG).error(f"意图识别失败: {str(e)}")
