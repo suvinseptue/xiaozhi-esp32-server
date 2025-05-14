@@ -590,12 +590,14 @@ class ConnectionHandler:
 
             # self.logger.bind(tag=TAG).info(f"对话记录: {self.dialogue.get_llm_dialogue_with_memory(memory_str)}")
 
+
             # 使用支持functions的streaming接口
             llm_responses = self.llm.response_with_functions(
                 self.session_id,
                 self.dialogue.get_llm_dialogue_with_memory(memory_str),
                 functions=functions,
             )
+            self.logger.bind(tag=TAG).debug(f"[chat_with_function_calling]{self.llm.__name__}LLM对话耗时：{time.time() - start_time:.3f}s")
         except Exception as e:
             self.logger.bind(tag=TAG).error(f"LLM 处理出错 {query}: {e}")
             return None
