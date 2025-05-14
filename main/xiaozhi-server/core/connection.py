@@ -597,7 +597,7 @@ class ConnectionHandler:
                 self.dialogue.get_llm_dialogue_with_memory(memory_str),
                 functions=functions,
             )
-            self.logger.bind(tag=TAG).debug(f"[chat_with_function_calling]{self.llm.__name__}LLM对话耗时：{time.time() - start_time:.3f}s")
+            self.logger.bind(tag=TAG).debug(f"[chat_with_function_calling]LLM对话耗时：{time.time() - start_time:.3f}s")
         except Exception as e:
             self.logger.bind(tag=TAG).error(f"LLM 处理出错 {query}: {e}")
             return None
