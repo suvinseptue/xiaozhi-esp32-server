@@ -24,7 +24,7 @@ services:
       - ./data:/opt/xiaozhi-esp32-server/data
       # 模型文件挂接，很重要
       - ./models/SenseVoiceSmall/model.pt:/opt/xiaozhi-esp32-server/models/SenseVoiceSmall/model.pt
-
+      - ./models/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-2024-07-17/model.int8.onnx:/opt/xiaozhi-esp32-server/models/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-2024-07-17/model.int8.onnx
   # manager-api和manager-web模块
   xiaozhi-esp32-server-web:
     image: registry.cn-hangzhou.aliyuncs.com/suvin/xiaozhi-esp32-web:web_latest
