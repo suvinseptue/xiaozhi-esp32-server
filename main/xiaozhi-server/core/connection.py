@@ -597,7 +597,6 @@ class ConnectionHandler:
                 self.dialogue.get_llm_dialogue_with_memory(memory_str),
                 functions=functions,
             )
-            self.logger.bind(tag=TAG).debug(f"[chat_with_function_calling]LLM对话耗时：{time.time() - start_time:.3f}s")
         except Exception as e:
             self.logger.bind(tag=TAG).error(f"LLM 处理出错 {query}: {e}")
             return None
@@ -642,7 +641,7 @@ class ConnectionHandler:
                         break
 
                     end_time = time.time()
-                    # self.logger.bind(tag=TAG).debug(f"大模型返回时间: {end_time - start_time} 秒, 生成token={content}")
+                    self.logger.bind(tag=TAG).debug(f"大模型返回时间: {end_time - start_time} 秒, 生成token={content}")
 
                     # 处理文本分段和TTS逻辑
                     # 合并当前全部文本并处理未分割部分
@@ -961,6 +960,7 @@ class ConnectionHandler:
         self.logger.bind(tag=TAG).info("聊天记录上报线程已退出")
 
     def speak_and_play(self, text, text_index=0):
+        tts_start_time = time.time()
         if text is None or len(text) <= 0:
             self.logger.bind(tag=TAG).info(f"无需tts转换，query为空，{text}")
             return None, text, text_index
@@ -971,6 +971,7 @@ class ConnectionHandler:
         self.logger.bind(tag=TAG).debug(f"TTS 文件生成完毕: {tts_file}")
         if self.max_output_size > 0:
             add_device_output(self.headers.get("device-id"), len(text))
+        self.logger.bind(tag=TAG).debug(f"[speak_and_play]TTS文件生成耗时：{time.time()-tts_start_time:.3f}s")
         return tts_file, text, text_index
 
     def clearSpeakStatus(self):
