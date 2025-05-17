@@ -1,4 +1,4 @@
-
+delete from `ai_agent_template` where `agent_name` in ('童伴小熊');
 INSERT INTO `ai_agent_template` VALUES ('e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b2', '小智', '童伴小熊', 'ASR_FunASR', 'VAD_SileroVAD', 'LLM_ChatGLMLLM', 'TTS_EdgeTTS', 'TTS_EdgeTTS0001', 'Memory_nomem', 'Intent_function_call', '# 角色设定
 你是童伴小泰迪熊，名字是{{assistant_name}}，是孩子们贴心的陪伴好朋友，富有孩童般的想象力。具备绘声绘色讲故事的能力，
 能够解答各类知识问答，支持语音对话交流，且会主动热情地向孩子们打招呼。
@@ -81,3 +81,11 @@ update ai_model_config set config_json = '{\"type\": \"openai\", \"base_url\": \
 update `ai_model_config` set config_json='{\"type\": \"openai\", \"model_name\": \"glm-4-flash\", \"base_url\": \"https://open.bigmodel.cn/api/paas/v4/\", \"api_key\": \"616f4cdca4d64f279b4ff9e6bae58470.FuYnwkCBbApJcn75\"}' where id='LLM_ChatGLMLLM';
 
 update `ai_model_config` set config_json='{\"type\": \"openai\", \"base_url\": \"https://ark.cn-beijing.volces.com/api/v3\", \"model_name\": \"doubao-pro-32k-functioncall-241028\", \"api_key\": \"3f335a9e-ad91-48d2-bc5c-683750f7b356\"}' where id='LLM_DoubaoLLM';
+
+
+delete from ai_tts_voice where `name` in ('通用女声','活泼女声', '知性姐姐', '灿灿', '炀炀', '温柔小哥');
+INSERT INTO `ai_tts_voice` VALUES ('TTS_DoubaoTTS1006', 'TTS_DoubaoTTS', '活泼女声', 'BV051_streaming', '普通话', 'https://lf3-speech.bytetos.com/obj/speech-tts-external/portal/Portal_Demo_BV051.mp3', NULL, 5, NULL, NULL, NULL, NULL);
+INSERT INTO `ai_tts_voice` VALUES ('TTS_DoubaoTTS1006', 'TTS_DoubaoTTS', '知性姐姐', 'BV051_streaming', '普通话', 'https://lf3-speech.bytetos.com/obj/speech-tts-external/portal/Portal_Demo_BV051.mp3', NULL, 5, NULL, NULL, NULL, NULL);
+INSERT INTO `ai_tts_voice` VALUES ('TTS_DoubaoTTS1006', 'TTS_DoubaoTTS', '灿灿', 'BV051_streaming', '普通话', 'https://lf3-speech.bytetos.com/obj/speech-tts-external/portal/Portal_Demo_BV051.mp3', NULL, 5, NULL, NULL, NULL, NULL);
+INSERT INTO `ai_tts_voice` VALUES ('TTS_DoubaoTTS1006', 'TTS_DoubaoTTS', '炀炀', 'BV051_streaming', '普通话', 'https://lf3-speech.bytetos.com/obj/speech-tts-external/portal/Portal_Demo_BV051.mp3', NULL, 5, NULL, NULL, NULL, NULL);
+INSERT INTO `ai_tts_voice` VALUES ('TTS_DoubaoTTS1006', 'TTS_DoubaoTTS', '温柔小哥', 'BV051_streaming', '普通话', 'https://lf3-speech.bytetos.com/obj/speech-tts-external/portal/Portal_Demo_BV051.mp3', NULL, 5, NULL, NULL, NULL, NULL);
