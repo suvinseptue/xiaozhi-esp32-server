@@ -53,7 +53,7 @@ INSERT INTO `ai_agent_template` VALUES ('e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b2', '小
 
 ', 'zh', '中文', 4,  NULL, NULL, NULL, NULL);
 
-update ai_model_config set config_json = '{\"type\": \"doubao\", \"api_url\": \"https://openspeech.bytedance.com/api/v1/tts\", \"voice\": \"BV001_streaming\", \"output_dir\": \"tmp/\", \"authorization\": \"Bearer;\", \"appid\": \"6688255122\", \"access_token\": \"vz7HbjK6RBJF1asQlRaNA3k_E6Vnvw5a\", \"cluster\": \"volcano_tts\"}' where id='TTS_DoubaoTTS';
+update ai_model_config set config_json = '{\"type\": \"doubao\", \"api_url\": \"https://openspeech.bytedance.com/api/v1/tts\", \"voice\": \"BV001_streaming\", \"output_dir\": \"tmp/\", \"authorization\": \"Bearer;\", \"appid\": \"8036145556\", \"access_token\": \"9C3I1ZVpQ6WI4EnrfSlc27q382XlQt5E\", \"cluster\": \"volcano_tts\"}' where id='TTS_DoubaoTTS';
 
 update ai_model_config set config_json = '{\"type\": \"siliconflow\", \"model\": \"FunAudioLLM/CosyVoice2-0.5B\", \"voice\": \"FunAudioLLM/CosyVoice2-0.5B:alex\", \"output_dir\": \"tmp/\", \"access_token\": \"sk-gcjodbzlrfghtovrrbqkfqikjgagimufiicowewqwlkbddul\", \"response_format\": \"wav\"}' where id='TTS_CosyVoiceSiliconflow';
 
