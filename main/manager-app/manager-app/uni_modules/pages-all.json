@@ -1,0 +1,44 @@
+{
+  "pages": [
+    {
+      "path": "pages/login",
+      "style": {
+        "navigationBarTitleText": "登录"
+      }
+    },
+    {
+      "path": "pages/roleConfig",
+      "style": {
+        "navigationBarTitleText": "角色配置"
+      }
+    },
+    {
+      "path": "pages/home",
+      "style": {
+        "navigationBarTitleText": "首页"
+      }
+    },
+    {
+      "path": "pages/register",
+      "style": {
+        "navigationBarTitleText": "注册"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarBackgroundColor": "#FFFFFF",
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "uni-app",
+    "backgroundColor": "#F8F8F8",
+    "backgroundTextStyle": "dark"
+  },
+  "condition": {
+    "current": 0,
+    "list": [
+      {
+        "name": "login",
+        "path": "pages/login"
+      }
+    ]
+  }
+}

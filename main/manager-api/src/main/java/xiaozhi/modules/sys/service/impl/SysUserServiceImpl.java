@@ -24,6 +24,7 @@ import xiaozhi.common.utils.ConvertUtils;
 import xiaozhi.modules.agent.service.AgentService;
 import xiaozhi.modules.device.service.DeviceService;
 import xiaozhi.modules.security.password.PasswordUtils;
+import xiaozhi.modules.security.utils.SecurityUtils;
 import xiaozhi.modules.sys.dao.SysUserDao;
 import xiaozhi.modules.sys.dto.AdminPageUserDTO;
 import xiaozhi.modules.sys.dto.PasswordDTO;
@@ -77,9 +78,11 @@ public class SysUserServiceImpl extends BaseServiceImpl<SysUserDao, SysUserEntit
             throw new RenException(ErrorCode.PASSWORD_WEAK_ERROR);
         }
 
-        // 密码加密
-        String password = PasswordUtils.encode(entity.getPassword());
-        entity.setPassword(password);
+        if (SecurityUtils.isInnerUser(dto)) {
+            // 密码加密
+            String password = PasswordUtils.encode(entity.getPassword());
+            entity.setPassword(password);
+        }
 
         // 保存用户
         Long userCount = getUserCount();
@@ -221,5 +224,17 @@ public class SysUserServiceImpl extends BaseServiceImpl<SysUserDao, SysUserEntit
             return true;
         }
         return false;
+    }
+
+    @Override
+    public SysUserDTO getByWechatId(String openid) {
+        QueryWrapper<SysUserEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("platform_id", openid);
+        List<SysUserEntity> users = sysUserDao.selectList(queryWrapper);
+        if (users == null || users.isEmpty()) {
+            return null;
+        }
+        SysUserEntity entity = users.getFirst();
+        return ConvertUtils.sourceToTarget(entity, SysUserDTO.class);
     }
 }

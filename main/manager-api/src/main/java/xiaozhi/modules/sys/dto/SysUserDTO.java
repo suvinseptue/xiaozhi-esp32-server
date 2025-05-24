@@ -84,4 +84,10 @@ public class SysUserDTO implements Serializable {
     @Schema(description = "部门名称")
     private String deptName;
 
+    @Schema(description = "注册平台")
+    private String platform;
+
+    @Schema(description = "注册平台的ID")
+    private String platformID;
+
 }

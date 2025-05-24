@@ -81,6 +81,7 @@ public class ShiroConfig {
         filterMap.put("/favicon.ico", "anon");
         filterMap.put("/user/captcha", "anon");
         filterMap.put("/user/login", "anon");
+        filterMap.put("/wechat/login", "anon");
         filterMap.put("/user/pub-config", "anon");
         filterMap.put("/user/register", "anon");
         // 将config路径使用server服务过滤器

@@ -78,6 +78,13 @@ public class SwaggerConfig {
                 .pathsToMatch("/config/**")
                 .build();
     }
+    @Bean
+    public GroupedOpenApi wechatAPI() {
+        return GroupedOpenApi.builder()
+                .group("wechat")
+                .pathsToMatch("/wechat/**")
+                .build();
+    }
 
     @Bean
     public OpenAPI customOpenAPI() {

@@ -72,4 +72,12 @@ public interface SysUserService extends BaseService<SysUserEntity> {
      * @return 是否允许用户注册
      */
     boolean getAllowUserRegister();
+
+
+    /**
+     * 基于三方平台用户ID，获取注册用户信息
+     * @param openid 三方平台用户ID
+     * @return 用户信息
+     */
+    SysUserDTO getByWechatId(String openid);
 }

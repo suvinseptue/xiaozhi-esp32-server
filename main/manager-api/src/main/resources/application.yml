@@ -64,3 +64,7 @@ mybatis-plus:
     prefix:
     blobType: BLOB
     boolValue: TRUE
+
+wechat:
+  appid: wx7af15f3327ebae01
+  secret: fdee9f508afe4a7c09c4d7e74b78751b
