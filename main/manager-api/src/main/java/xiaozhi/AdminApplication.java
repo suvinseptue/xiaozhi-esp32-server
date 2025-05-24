@@ -10,4 +10,4 @@ public class AdminApplication {
         SpringApplication.run(AdminApplication.class, args);
         System.out.println("http://localhost:8002/xiaozhi/doc.html");
     }
-}
+};
