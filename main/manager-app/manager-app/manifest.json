@@ -18,10 +18,11 @@
         },
         /* 模块配置 */
         "modules" : {
-			 "OAuth": {                          //可选，JSON对象，OAuth(登录鉴权)
-			                "description": "登录鉴权"
-			            }
-		},
+            "OAuth" : {
+                //可选，JSON对象，OAuth(登录鉴权)
+                "description" : "登录鉴权"
+            }
+        },
         /* 应用发布信息 */
         "distribute" : {
             /* android打包配置 */

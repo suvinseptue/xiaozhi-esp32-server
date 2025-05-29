@@ -88,6 +88,6 @@ public class SysUserDTO implements Serializable {
     private String platform;
 
     @Schema(description = "注册平台的ID")
-    private String platformID;
+    private String platformId;
 
 }

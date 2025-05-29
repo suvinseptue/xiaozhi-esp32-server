@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import xiaozhi.common.entity.BaseEntity;
@@ -43,7 +42,7 @@ public class SysUserEntity extends BaseEntity {
     /**
      * 注册平台的ID
      */
-    private String platformID;
+    private String platformId;
 
     /**
      * 更新者

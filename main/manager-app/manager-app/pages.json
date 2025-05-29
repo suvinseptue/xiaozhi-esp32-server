@@ -1,21 +1,39 @@
 {
   "pages": [
     {
-      "path": "pages/login",
-      "style": {
-        "navigationBarTitleText": "登录"
-      }
-    },
-    {
-      "path": "pages/home",
+      "path": "pages/home/index",
       "style": {
         "navigationBarTitleText": "首页"
       }
     },
     {
-      "path": "pages/register",
+      "path": "pages/contact/index",
       "style": {
-        "navigationBarTitleText": "注册"
+        "navigationBarTitleText": "联系我们"
+      }
+    },
+    {
+      "path": "pages/device-management/index",
+      "style": {
+        "navigationBarTitleText": "设备管理"
+      }
+    },
+    {
+      "path": "pages/role-config/index",
+      "style": {
+        "navigationBarTitleText": "配置角色"
+      }
+    },
+    {
+      "path": "pages/agreement/user",
+      "style": {
+        "navigationBarTitleText": "用户协议"
+      }
+    },
+    {
+      "path": "pages/agreement/privacy",
+      "style": {
+        "navigationBarTitleText": "隐私协议"
       }
     }
   ],
@@ -24,15 +42,37 @@
     "navigationBarTextStyle": "black",
     "navigationBarTitleText": "uni-app",
     "backgroundColor": "#F8F8F8",
-    "backgroundTextStyle": "dark"
+    "backgroundTextStyle": "dark",
+    "navigationBarHeight": "44rpx"
   },
   "condition": {
     "current": 0,
     "list": [
       {
-        "name": "login",
-        "path": "pages/login"
+        "name": "home",
+        "path": "pages/home/index"
+      }
+    ]
+  },
+  "tabBar": {
+    "color": "#666666",
+    "selectedColor": "#FF5722",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "black",
+    "position": "bottom",
+    "list": [
+      {
+        "pagePath": "pages/home/index",
+        "text": "首页",
+        "iconPath": "/static/home/xiaozhi-logo.png",
+        "selectedIconPath": "/static/home/xiaozhi-logo.png"
+      },
+      {
+        "pagePath": "pages/contact/index",
+        "text": "联系我们",
+        "iconPath": "/static/contact/robot.png",
+        "selectedIconPath": "/static/contact/robot.png"
       }
     ]
   }
-}  
+}

@@ -1,707 +1,479 @@
 <template>
-  <div class="welcome">
-    <HeaderBar />
+  <view class="page-container">
+    <!-- 顶部导航 -->
+    <view class="header-bar">
+      <view class="back-btn" @click="goToHome">
+        <image src="/static/icons/back.png" mode="aspectFit"></image>
+      </view>
+      <text class="page-title">角色配置</text>
+    </view>
 
-    <div class="operation-bar">
-      <h2 class="page-title">角色配置</h2>
-    </div>
+    <!-- 主内容区 -->
+    <scroll-view class="main-content" scroll-y>
+      <view class="config-card">
+        <!-- 卡片头部 -->
+        <view class="card-header">
+          <view class="header-icon">
+            <image src="/static/icons/setting-user.png" mode="aspectFit"></image>
+          </view>
+          <text class="card-title">{{ form.agentName }}</text>
+        </view>
+        <view class="divider"></view>
 
-    <div class="main-wrapper">
-      <div class="content-panel">
-        <div class="content-area">
-          <el-card class="config-card" shadow="never">
-            <div class="config-header">
-              <div class="header-icon">
-                <img loading="lazy" src="@/assets/home/setting-user.png" alt="">
-              </div>
-              <span class="header-title">{{ form.agentName }}</span>
-              <button class="custom-close-btn" @click="goToHome">
-                ×
-              </button>
-            </div>
-            <div class="divider"></div>
+        <!-- 表单内容 -->
+        <view class="form-content">
+          <!-- 基础信息 -->
+          <view class="form-section">
+            <text class="section-title">基础信息</text>
+            <uni-forms ref="roleForm" :model="form">
+              <uni-forms-item label="助手昵称" required>
+                <uni-easyinput 
+                  v-model="form.agentName" 
+                  placeholder="请输入助手昵称"
+                  class="form-input"
+                />
+              </uni-forms-item>
+              
+              <uni-forms-item label="角色介绍" required>
+                <uni-easyinput 
+                  type="textarea" 
+                  v-model="form.systemPrompt" 
+                  placeholder="请输入角色介绍"
+                  rows="6"
+                  maxlength="2000"
+                  show-word-limit
+                  class="form-textarea"
+                />
+              </uni-forms-item>
+            </uni-forms>
+          </view>
 
-            <el-form ref="form" :model="form" label-width="72px">
-              <div class="form-content">
-                <div class="form-grid">
-                  <div class="form-column">
-                    <el-form-item label="助手昵称：">
-                      <el-input v-model="form.agentName" class="form-input" />
-                    </el-form-item>
-                    <el-form-item label="角色模版：">
-                      <div class="template-container">
-                        <div v-for="(template, index) in templates" :key="`template-${index}`" class="template-item"
-                          :class="{ 'template-loading': loadingTemplate }" @click="selectTemplate(template)">
-                          {{ template.agentName }}
-                        </div>
-                      </div>
-                    </el-form-item>
-                    <el-form-item label="角色介绍：">
-                      <el-input type="textarea" rows="12" resize="none" placeholder="请输入内容" v-model="form.systemPrompt"
-                        maxlength="2000" show-word-limit class="form-textarea" />
-                    </el-form-item>
-                    <el-form-item label="语言编码：" style="display: none;">
-                      <el-input v-model="form.langCode" placeholder="请输入语言编码，如：zh_CN" maxlength="10" show-word-limit
-                        class="form-input" />
-                    </el-form-item>
-                    <el-form-item label="交互语种：" style="display: none;">
-                      <el-input v-model="form.language" placeholder="请输入交互语种，如：中文" maxlength="10" show-word-limit
-                        class="form-input" />
-                    </el-form-item>
-                    <div class="action-bar">
-                      <el-button type="primary" class="save-btn" @click="saveConfig">保存配置</el-button>
-                      <el-button class="reset-btn" @click="resetConfig">重置</el-button>
-                      <div class="hint-text">
-                        <img loading="lazy" src="@/assets/home/red-info.png" alt="">
-                        <span>保存配置后，需要重启设备，新的配置才会生效。</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="form-column">
-                    <el-form-item v-for="(model, index) in models" :key="`model-${index}`" :label="model.label"
-                      class="model-item">
-                      <div class="model-select-wrapper">
-                        <el-select v-model="form.model[model.key]" filterable placeholder="请选择" class="form-select"
-                          @change="handleModelChange(model.type, $event)">
-                          <el-option v-for="(item, optionIndex) in modelOptions[model.type]"
-                            :key="`option-${index}-${optionIndex}`" :label="item.label" :value="item.value" />
-                        </el-select>
-                        <div v-if="showFunctionIcons(model.type)" class="function-icons">
-                          <el-tooltip v-for="func in currentFunctions" :key="func.name" effect="dark" placement="top"
-                            popper-class="custom-tooltip">
-                            <div slot="content">
-                              <div><strong>功能名称:</strong> {{ func.name }}</div>
-                              <div v-if="Object.keys(func.params).length > 0">
-                                <strong>参数配置:</strong>
-                                <div v-for="(value, key) in func.params" :key="key">
-                                  {{ key }}: {{ value }}
-                                </div>
-                              </div>
-                              <div v-else>无参数配置</div>
-                            </div>
-                            <div class="icon-dot" :style="{ backgroundColor: getFunctionColor(func.name) }">
-                              {{ func.name.charAt(0) }}
-                            </div>
-                          </el-tooltip>
-                          <el-button class="edit-function-btn" @click="showFunctionDialog = true"
-                            :class="{ 'active-btn': showFunctionDialog }">
-                            编辑功能
-                          </el-button>
-                        </div>
-                        <div v-if="model.type === 'Memory' && form.model.memModelId !== 'Memory_nomem'"
-                          class="chat-history-options">
-                          <el-radio-group v-model="form.chatHistoryConf" @change="updateChatHistoryConf">
-                            <el-radio-button :label="1">上报文字</el-radio-button>
-                            <el-radio-button :label="2">上报文字+语音</el-radio-button>
-                          </el-radio-group>
-                        </div>
-                      </div>
-                    </el-form-item>
-                    <el-form-item label="角色音色">
-                      <el-select v-model="form.ttsVoiceId" placeholder="请选择" class="form-select">
-                        <el-option v-for="(item, index) in voiceOptions" :key="`voice-${index}`" :label="item.label"
-                          :value="item.value" />
-                      </el-select>
-                    </el-form-item>
-                  </div>
-                </div>
-              </div>
-            </el-form>
-          </el-card>
-        </div>
-      </div>
-    </div>
+          <!-- 模型配置 -->
+          <view class="form-section">
+            <text class="section-title">模型配置</text>
+            <view class="model-group">
+              <view v-for="model in models" :key="model.key" class="model-item">
+                <text class="model-label">{{ model.label }}</text>
+                <uni-data-select 
+                  v-model="form.model[model.key]"
+                  :localdata="modelOptions[model.type]"
+                  placeholder="请选择"
+                  class="model-select"
+                  @change="handleModelChange(model.type, $event)"
+                />
+              </view>
+            </view>
+          </view>
 
-    <function-dialog v-model="showFunctionDialog" :functions="currentFunctions"
-      @update-functions="handleUpdateFunctions" @dialog-closed="handleDialogClosed" />
-  </div>
+          <!-- 语音配置 -->
+          <view class="form-section">
+            <text class="section-title">语音配置</text>
+            <uni-forms-item label="角色音色">
+              <uni-data-select 
+                v-model="form.ttsVoiceId"
+                :localdata="voiceOptions"
+                placeholder="请选择音色"
+                class="model-select"
+              />
+            </uni-forms-item>
+          </view>
+
+          <!-- 功能配置 -->
+          <view class="form-section" v-if="showFunctionIcons">
+            <text class="section-title">功能配置</text>
+            <view class="function-group">
+              <view v-for="func in currentFunctions" :key="func.name" class="function-item">
+                <view class="function-dot" :style="{ backgroundColor: getFunctionColor(func.name) }">
+                  {{ func.name.substr(0,1) }}
+                </view>
+                <text class="function-name">{{ func.name }}</text>
+              </view>
+              <uni-button 
+                type="primary" 
+                size="mini" 
+                class="edit-func-btn" 
+                @click="showFunctionDialog = true"
+              >
+                编辑功能
+              </uni-button>
+            </view>
+          </view>
+
+          <!-- 操作按钮 -->
+          <view class="action-buttons">
+            <uni-button type="default" @click="resetConfig">重置</uni-button>
+            <uni-button type="primary" @click="saveConfig">保存配置</uni-button>
+          </view>
+
+          <!-- 提示信息 -->
+          <view class="hint-text">
+            <image src="/static/icons/red-info.png" mode="aspectFit"></image>
+            <text>保存配置后，需要重启设备，新的配置才会生效。</text>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+
+    <!-- 功能编辑弹窗 -->
+    <function-dialog 
+      v-model:visible="showFunctionDialog"
+      :functions="currentFunctions"
+      :all-functions="allFunctions"
+      @update-functions="handleUpdateFunctions"
+    />
+  </view>
 </template>
 
-<script>
-import Api from '@/apis/api';
-import FunctionDialog from "@/components/FunctionDialog.vue";
-import HeaderBar from "@/components/HeaderBar.vue";
+<script setup>
+import { ref, reactive, watch } from 'vue';
+import { uniRequest } from '@/utils/request';  // 假设的uni-app请求封装
+import FunctionDialog from '@/components/FunctionDialog.vue';
 
-export default {
-  name: 'RoleConfigPage',
-  components: { HeaderBar, FunctionDialog },
-  data() {
-    return {
-      form: {
-        agentCode: "",
-        agentName: "",
-        ttsVoiceId: "",
-        chatHistoryConf: 0,
-        systemPrompt: "",
-        langCode: "",
-        language: "",
-        sort: "",
-        model: {
-          ttsModelId: "",
-          vadModelId: "",
-          asrModelId: "",
-          llmModelId: "",
-          memModelId: "",
-          intentModelId: "",
-        }
-      },
-      models: [
-        { label: '语音活动检测(VAD)', key: 'vadModelId', type: 'VAD' },
-        { label: '语音识别(ASR)', key: 'asrModelId', type: 'ASR' },
-        { label: '大语言模型(LLM)', key: 'llmModelId', type: 'LLM' },
-        { label: '意图识别(Intent)', key: 'intentModelId', type: 'Intent' },
-        { label: '记忆(Memory)', key: 'memModelId', type: 'Memory' },
-        { label: '语音合成(TTS)', key: 'ttsModelId', type: 'TTS' },
-      ],
-      modelOptions: {},
-      templates: [],
-      loadingTemplate: false,
-      voiceOptions: [],
-      showFunctionDialog: false,
-      currentFunctions: [],
-      functionColorMap: [
-        '#FF6B6B', '#4ECDC4', '#45B7D1',
-        '#96CEB4', '#FFEEAD', '#D4A5A5', '#A2836E'
-      ],
-      allFunctions: [
-        { name: '天气', params: {} },
-        { name: '新闻', params: {} },
-        { name: '工具', params: {} },
-        { name: '退出', params: {} }
-      ],
-    }
-  },
-  methods: {
-    goToHome() {
-      this.$router.push('/home');
-    },
-    saveConfig() {
-      const configData = {
-        agentCode: this.form.agentCode,
-        agentName: this.form.agentName,
-        asrModelId: this.form.model.asrModelId,
-        vadModelId: this.form.model.vadModelId,
-        llmModelId: this.form.model.llmModelId,
-        ttsModelId: this.form.model.ttsModelId,
-        ttsVoiceId: this.form.ttsVoiceId,
-        chatHistoryConf: this.form.chatHistoryConf,
-        memModelId: this.form.model.memModelId,
-        intentModelId: this.form.model.intentModelId,
-        systemPrompt: this.form.systemPrompt,
-        langCode: this.form.langCode,
-        language: this.form.language,
-        sort: this.form.sort,
-        functions: this.currentFunctions
-      };
-      Api.agent.updateAgentConfig(this.$route.query.agentId, configData, ({ data }) => {
-        if (data.code === 0) {
-          this.$message.success({
-            message: '配置保存成功',
-            showClose: true
-          });
-        } else {
-          this.$message.error({
-            message: data.msg || '配置保存失败',
-            showClose: true
-          });
-        }
-      });
-    },
-    resetConfig() {
-      this.$confirm('确定要重置配置吗？', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        this.form = {
-          agentCode: "",
-          agentName: "",
-          ttsVoiceId: "",
-          chatHistoryConf: 0,
-          systemPrompt: "",
-          langCode: "",
-          language: "",
-          sort: "",
-          model: {
-            ttsModelId: "",
-            vadModelId: "",
-            asrModelId: "",
-            llmModelId: "",
-            memModelId: "",
-            intentModelId: "",
-          }
-        }
-        this.currentFunctions = [];
-        this.$message.success({
-          message: '配置已重置',
-          showClose: true
-        })
-      }).catch(() => { });
-    },
-    fetchTemplates() {
-      Api.agent.getAgentTemplate(({ data }) => {
-        if (data.code === 0) {
-          this.templates = data.data;
-        } else {
-          this.$message.error(data.msg || '获取模板列表失败');
-        }
-      });
-    },
-    selectTemplate(template) {
-      if (this.loadingTemplate) return;
-      this.loadingTemplate = true;
-      try {
-        this.applyTemplateData(template);
-        this.$message.success({
-          message: `「${template.agentName}」模板已应用`,
-          showClose: true
-        });
-      } catch (error) {
-        this.$message.error({
-          message: '应用模板失败',
-          showClose: true
-        });
-        console.error('应用模板失败:', error);
-      } finally {
-        this.loadingTemplate = false;
-      }
-    },
-    applyTemplateData(templateData) {
-      this.form = {
-        ...this.form,
-        agentName: templateData.agentName || this.form.agentName,
-        ttsVoiceId: templateData.ttsVoiceId || this.form.ttsVoiceId,
-        chatHistoryConf: templateData.chatHistoryConf || this.form.chatHistoryConf,
-        systemPrompt: templateData.systemPrompt || this.form.systemPrompt,
-        langCode: templateData.langCode || this.form.langCode,
-        model: {
-          ttsModelId: templateData.ttsModelId || this.form.model.ttsModelId,
-          vadModelId: templateData.vadModelId || this.form.model.vadModelId,
-          asrModelId: templateData.asrModelId || this.form.model.asrModelId,
-          llmModelId: templateData.llmModelId || this.form.model.llmModelId,
-          memModelId: templateData.memModelId || this.form.model.memModelId,
-          intentModelId: templateData.intentModelId || this.form.model.intentModelId
-        }
-      };
-    },
-    fetchAgentConfig(agentId) {
-      Api.agent.getDeviceConfig(agentId, ({ data }) => {
-        if (data.code === 0) {
-          this.form = {
-            ...this.form,
-            ...data.data,
-            model: {
-              ttsModelId: data.data.ttsModelId,
-              vadModelId: data.data.vadModelId,
-              asrModelId: data.data.asrModelId,
-              llmModelId: data.data.llmModelId,
-              memModelId: data.data.memModelId,
-              intentModelId: data.data.intentModelId
-            }
-          };
-          this.currentFunctions = data.data.functions || [];
-        } else {
-          this.$message.error(data.msg || '获取配置失败');
-        }
-      });
-    },
-    fetchModelOptions() {
-      this.models.forEach(model => {
-        Api.model.getModelNames(model.type, '', ({ data }) => {
-          if (data.code === 0) {
-            this.$set(this.modelOptions, model.type, data.data.map(item => ({
-              value: item.id,
-              label: item.modelName
-            })));
-          } else {
-            this.$message.error(data.msg || '获取模型列表失败');
-          }
-        });
-      });
-    },
-    fetchVoiceOptions(modelId) {
-      if (!modelId) {
-        this.voiceOptions = [];
-        return;
-      }
-      Api.model.getModelVoices(modelId, '', ({ data }) => {
-        if (data.code === 0 && data.data) {
-          this.voiceOptions = data.data.map(voice => ({
-            value: voice.id,
-            label: voice.name
-          }));
-        } else {
-          this.voiceOptions = [];
-        }
-      });
-    },
-    getFunctionColor(name) {
-      const hash = [...name].reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      return this.functionColorMap[hash % 7];
-    },
-    showFunctionIcons(type) {
-      // TODO 暂时不放出来
-      return false;
-      // return type === 'Intent' &&
-      //   this.form.model.intentModelId !== 'Intent_nointent';
-    },
-    handleModelChange(type, value) {
-      if (type === 'Intent' && value !== 'Intent_nointent') {
-        this.fetchFunctionList();
-      }
-      if (type === 'Memory' && value === 'Memory_nomem') {
-        this.form.chatHistoryConf = 0;
-      }
-      if (type === 'Memory' && value !== 'Memory_nomem' && (this.form.chatHistoryConf === 0 || this.form.chatHistoryConf === null)) {
-        this.form.chatHistoryConf = 2;
-      }
-    },
-    fetchFunctionList() {
-      // 使用假数据代替API调用
-      return new Promise(resolve => {
-        setTimeout(() => {
-          this.currentFunctions = [
-            { name: '天气', params: { city: '北京' } },
-            { name: '新闻', params: { type: '科技' } }
-          ];
-          resolve();
-        }, 500);
-      });
-    },
-    handleUpdateFunctions(selected) {
-      this.currentFunctions = selected;
-      console.log('保存的功能列表:', selected);
-      this.$message.success('功能配置已保存');
-    },
-    handleDialogClosed(saved) {
-      if (!saved) {
-        // 如果未保存，恢复原始功能列表
-        this.currentFunctions = JSON.parse(JSON.stringify(this.originalFunctions));
-      }
-    },
-    updateChatHistoryConf() {
-      if (this.form.model.memModelId === 'Memory_nomem') {
-        this.form.chatHistoryConf = 0;
-      }
-    },
-  },
-  watch: {
-    'form.model.ttsModelId': {
-      handler(newVal, oldVal) {
-        if (oldVal && newVal !== oldVal) {
-          this.form.ttsVoiceId = '';
-          this.fetchVoiceOptions(newVal);
-        } else {
-          this.fetchVoiceOptions(newVal);
-        }
-      },
-      immediate: true
-    },
-    voiceOptions: {
-      handler(newVal) {
-        if (newVal && newVal.length > 0 && !this.form.ttsVoiceId) {
-          this.form.ttsVoiceId = newVal[0].value;
-        }
-      },
-      immediate: true
-    }
-  },
-  mounted() {
-    const agentId = this.$route.query.agentId;
-    if (agentId) {
-      this.fetchAgentConfig(agentId);
-      this.fetchFunctionList().then(() => {
-        this.originalFunctions = JSON.parse(JSON.stringify(this.currentFunctions));
-      });
-    }
-    this.fetchModelOptions();
-    this.fetchTemplates();
+// 页面数据
+const form = reactive({
+  agentCode: '',
+  agentName: '',
+  ttsVoiceId: '',
+  chatHistoryConf: 0,
+  systemPrompt: '',
+  langCode: '',
+  language: '',
+  sort: '',
+  model: {
+    ttsModelId: '',
+    vadModelId: '',
+    asrModelId: '',
+    llmModelId: '',
+    memModelId: '',
+    intentModelId: ''
   }
-}
+});
+
+// 常量配置
+const models = ref([
+  { label: '语音活动检测(VAD)', key: 'vadModelId', type: 'VAD' },
+  { label: '语音识别(ASR)', key: 'asrModelId', type: 'ASR' },
+  { label: '大语言模型(LLM)', key: 'llmModelId', type: 'LLM' },
+  { label: '意图识别(Intent)', key: 'intentModelId', type: 'Intent' },
+  { label: '记忆(Memory)', key: 'memModelId', type: 'Memory' },
+  { label: '语音合成(TTS)', key: 'ttsModelId', type: 'TTS' }
+]);
+
+const modelOptions = ref({});
+const voiceOptions = ref([]);
+const showFunctionDialog = ref(false);
+const currentFunctions = ref([]);
+const allFunctions = ref([
+  { name: '天气', params: {} },
+  { name: '新闻', params: {} },
+  { name: '工具', params: {} },
+  { name: '退出', params: {} }
+]);
+const functionColorMap = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#D4A5A5', '#A2836E'];
+
+// 生命周期
+onLoad((options) => {
+  const agentId = options.agentId;
+  if (agentId) {
+    fetchAgentConfig(agentId);
+    fetchFunctionList();
+  }
+  fetchModelOptions();
+  fetchTemplates();
+});
+
+// 方法定义
+const goToHome = () => {
+  uni.navigateBack();  // 小程序返回上一页
+};
+
+const saveConfig = () => {
+  const configData = { ...form, functions: currentFunctions.value };
+  uniRequest({
+    url: `/agent/update/${form.agentCode}`,
+    method: 'POST',
+    data: configData,
+    success: (res) => {
+      if (res.code === 0) {
+        uni.showToast({ title: '保存成功', icon: 'success' });
+      } else {
+        uni.showToast({ title: res.msg || '保存失败', icon: 'none' });
+      }
+    }
+  });
+};
+
+const resetConfig = () => {
+  uni.showModal({
+    title: '提示',
+    content: '确定要重置配置吗？',
+    success: (res) => {
+      if (res.confirm) {
+        // 重置表单数据
+        Object.assign(form, {
+          agentName: '',
+          ttsVoiceId: '',
+          systemPrompt: '',
+          model: { ...form.model }
+        });
+        currentFunctions.value = [];
+        uni.showToast({ title: '已重置', icon: 'success' });
+      }
+    }
+  });
+};
+
+const fetchAgentConfig = (agentId) => {
+  uniRequest({
+    url: `/agent/config/${agentId}`,
+    success: (res) => {
+      if (res.code === 0) {
+        Object.assign(form, res.data);
+        currentFunctions.value = res.data.functions || [];
+      }
+    }
+  });
+};
+
+const fetchModelOptions = () => {
+  models.value.forEach(model => {
+    uniRequest({
+      url: `/model/options/${model.type}`,
+      success: (res) => {
+        modelOptions.value[model.type] = res.data.map(item => ({
+          value: item.id,
+          text: item.modelName
+        }));
+      }
+    });
+  });
+};
+
+const getFunctionColor = (name) => {
+  const hash = [...name].reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return functionColorMap[hash % 7];
+};
+
+const handleUpdateFunctions = (selected) => {
+  currentFunctions.value = selected;
+  uni.showToast({ title: '功能配置保存成功', icon: 'success' });
+};
+
+// 监听模型变化
+watch(() => form.model.ttsModelId, (newVal) => {
+  if (newVal) {
+    uniRequest({
+      url: `/model/voices/${newVal}`,
+      success: (res) => {
+        voiceOptions.value = res.data.map(voice => ({
+          value: voice.id,
+          text: voice.name
+        }));
+      }
+    });
+  }
+}, { immediate: true });
 </script>
 
-<style scoped>
-.welcome {
-  min-width: 900px;
+<style scoped lang="scss">
+.page-container {
   height: 100vh;
-  display: flex;
-  position: relative;
-  flex-direction: column;
-  background: linear-gradient(to bottom right, #dce8ff, #e4eeff, #e6cbfd);
-  background-size: cover;
-  -webkit-background-size: cover;
-  -o-background-size: cover;
-  overflow: hidden;
+  background: #f5f7fa;
 }
 
-.operation-bar {
+/* 顶部导航 */
+.header-bar {
+  height: 100rpx;
+  padding: 0 30rpx;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 1.5vh 24px;
+  background: #fff;
+  border-bottom: 1rpx solid #e8f0ff;
+
+  .back-btn {
+    width: 40rpx;
+    height: 40rpx;
+    margin-right: 30rpx;
+
+    image {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .page-title {
+    font-size: 36rpx;
+    color: #2c3e50;
+    font-weight: 600;
+  }
 }
 
-.page-title {
-  font-size: 24px;
-  margin: 0;
-  color: #2c3e50;
-}
-
-.main-wrapper {
-  margin: 1vh 22px;
-  border-radius: 15px;
-  height: calc(100vh - 24vh);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-  position: relative;
-  background: rgba(237, 242, 255, 0.5);
-  display: flex;
-  flex-direction: column;
-}
-
-.content-panel {
-  flex: 1;
-  display: flex;
-  overflow: hidden;
-  height: 100%;
-  border-radius: 15px;
-  background: transparent;
-  border: 1px solid #fff;
-}
-
-.content-area {
-  flex: 1;
-  height: 100%;
-  min-width: 600px;
-  overflow: auto;
-  background-color: white;
-  display: flex;
-  flex-direction: column;
+/* 主内容区 */
+.main-content {
+  padding: 30rpx;
 }
 
 .config-card {
-  background: white;
-  border: none;
-  box-shadow: none;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  overflow-y: auto;
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 40rpx 30rpx;
+  box-shadow: 0 4rpx 20rpx rgba(87, 120, 255, 0.08);
 }
 
-.config-header {
-  position: relative;
+.card-header {
   display: flex;
   align-items: center;
-  gap: 13px;
-  padding: 0 0 5px 0;
-  font-weight: 700;
-  font-size: 19px;
-  color: #3d4566;
-}
+  gap: 20rpx;
+  margin-bottom: 30rpx;
 
-.header-icon {
-  width: 37px;
-  height: 37px;
-  background: #5778ff;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+  .header-icon {
+    width: 60rpx;
+    height: 60rpx;
+    background: #5778ff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-.header-icon img {
-  width: 19px;
-  height: 19px;
+    image {
+      width: 32rpx;
+      height: 32rpx;
+    }
+  }
+
+  .card-title {
+    font-size: 32rpx;
+    color: #3d4566;
+    font-weight: 600;
+  }
 }
 
 .divider {
-  height: 1px;
+  height: 2rpx;
   background: #e8f0ff;
+  margin: 30rpx 0;
 }
 
-.form-content {
-  padding: 2vh 0;
-}
+/* 表单部分 */
+.form-section {
+  margin-bottom: 40rpx;
 
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-
-.form-column {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  .section-title {
+    font-size: 30rpx;
+    color: #3d4566;
+    font-weight: 600;
+    margin-bottom: 20rpx;
+  }
 }
 
 .form-input {
-  width: 100%;
-}
-
-.form-select {
-  width: 100%;
+  height: 80rpx;
+  border: 2rpx solid #e6ebff;
+  border-radius: 16rpx;
+  padding: 0 20rpx;
+  font-size: 28rpx;
 }
 
 .form-textarea {
-  width: 100%;
+  min-height: 240rpx;
+  border: 2rpx solid #e6ebff;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  font-size: 28rpx;
 }
 
-.template-container {
+.model-group {
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 24rpx;
+
+  .model-item {
+    display: flex;
+    flex-direction: column;
+    gap: 12rpx;
+
+    .model-label {
+      font-size: 28rpx;
+      color: #666;
+    }
+
+    .model-select {
+      .uni-data-select {
+        border: 2rpx solid #e6ebff;
+        border-radius: 16rpx;
+        height: 80rpx;
+        font-size: 28rpx;
+      }
+    }
+  }
 }
 
-.template-item {
-  height: 4vh;
-  width: 76px;
-  border-radius: 8px;
-  background: #e6ebff;
-  line-height: 4vh;
-  font-weight: 400;
-  font-size: 11px;
-  text-align: center;
-  color: #5778ff;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.template-item:hover {
-  background-color: #d0d8ff;
-}
-
-.action-bar {
+.function-group {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 2vh;
   align-items: center;
-}
+  flex-wrap: wrap;
+  gap: 20rpx;
+  margin: 20rpx 0;
 
-.action-bar {
-  .el-button.save-btn {
-    background: #5778ff;
-    color: white;
-    border: none;
-    border-radius: 18px;
-    padding: 10px 20px;
-    width: 100px;
-    height: 35px;
-    font-size: 14px;
+  .function-item {
+    display: flex;
+    align-items: center;
+    gap: 12rpx;
+
+    .function-dot {
+      width: 40rpx;
+      height: 40rpx;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 24rpx;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .function-name {
+      font-size: 28rpx;
+      color: #333;
+    }
   }
 
-  .el-button.reset-btn {
-    background: #e6ebff;
-    color: #5778ff;
-    border: 1px solid #adbdff;
-    border-radius: 18px;
-    padding: 10px 20px;
+  .edit-func-btn {
+    height: 60rpx;
+    line-height: 60rpx;
+    padding: 0 30rpx;
+    border-radius: 30rpx;
+    font-size: 28rpx;
+  }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 30rpx;
+  margin: 40rpx 0;
+
+  uni-button {
+    flex: 1;
+    height: 88rpx;
+    font-size: 32rpx;
+    border-radius: 44rpx;
+  }
+
+  .uni-button-primary {
+    background: #5778ff;
   }
 }
 
 .hint-text {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12rpx;
   color: #979db1;
-  font-size: 11px;
-  margin-left: 16px;
-}
+  font-size: 24rpx;
+  margin-top: 20rpx;
 
-.hint-text img {
-  width: 19px;
-  height: 19px;
-}
-
-.model-select-wrapper {
-  display: flex;
-  align-items: center;
-  width: 100%;
-}
-
-.function-icons {
-  display: flex;
-  align-items: center;
-  margin-left: auto;
-  padding-left: 10px;
-}
-
-.icon-dot {
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: bold;
-  font-size: 12px;
-  margin-right: 8px;
-  position: relative;
-}
-
-::v-deep .el-form-item__label {
-  font-size: 12px !important;
-  color: #3d4566 !important;
-  font-weight: 400;
-  line-height: 22px;
-  padding-bottom: 2px;
-}
-
-::v-deep .el-textarea .el-input__count {
-  color: #909399;
-  background: none;
-  position: absolute;
-  font-size: 12px;
-  right: 3%;
-}
-
-.custom-close-btn {
-  position: absolute;
-  top: 25%;
-  right: 0;
-  transform: translateY(-50%);
-  width: 35px;
-  height: 35px;
-  border-radius: 50%;
-  border: 2px solid #cfcfcf;
-  background: none;
-  font-size: 30px;
-  font-weight: lighter;
-  color: #cfcfcf;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1;
-  padding: 0;
-  outline: none;
-}
-
-.custom-close-btn:hover {
-  color: #409EFF;
-  border-color: #409EFF;
-}
-
-.edit-function-btn {
-  background: #e6ebff;
-  color: #5778ff;
-  border: 1px solid #adbdff;
-  border-radius: 18px;
-  padding: 10px 20px;
-  transition: all 0.3s;
-}
-
-.edit-function-btn.active-btn {
-  background: #5778ff;
-  color: white;
-}
-
-.chat-history-options {
-  display: flex;
-  gap: 10px;
-  min-width: 250px;
-  justify-content: flex-end;
+  image {
+    width: 32rpx;
+    height: 32rpx;
+  }
 }
 </style>

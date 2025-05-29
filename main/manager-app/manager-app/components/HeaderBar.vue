@@ -90,7 +90,7 @@ export default {
   components: {
     ChangePasswordDialog
   },
-  props: ['devices'],  // 接收父组件设备列表
+  props: ['devices'],
   data() {
     return {
       search: '',
@@ -98,107 +98,126 @@ export default {
         username: '',
         mobile: ''
       },
-      isChangePasswordDialogVisible: false // 控制修改密码弹窗的显示
+      isChangePasswordDialogVisible: false,
+      showDropdown: false,
+      showUserDropdown: false,
+      // 图标路径配置
+      iconPath: '/static/header/',
+      logoImg: '/static/xiaozhi-logo.png',
+      brandImg: '/static/xiaozhi-ai.png',
+      avatarImg: '/static/home/avatar.png'
     }
   },
   computed: {
     ...mapGetters(['getIsSuperAdmin']),
     isSuperAdmin() {
       return this.getIsSuperAdmin;
+    },
+    currentPath() {
+      return this.$route.path;
     }
   },
-  mounted() {
-    this.fetchUserInfo()
+  onLoad() {
+    this.fetchUserInfo();
   },
   methods: {
+    // 判断当前路径是否激活
+    isActive(...paths) {
+      return paths.some(path => this.currentPath === path);
+    },
+    
+    // 获取激活状态的图标路径
+    getActiveIcon(activePath, activePath2, activePath3, iconName) {
+      if (this.isActive(activePath, activePath2, activePath3)) {
+        return `${this.iconPath}${iconName}_active.png`;
+      }
+      return `${this.iconPath}${iconName}.png`;
+    },
+    
     goHome() {
-      // 跳转到首页
-      this.$router.push('/home')
+      uni.navigateTo({ url: '/pages/home/index' });
     },
     goUserManagement() {
-      this.$router.push('/user-management')
+      uni.navigateTo({ url: '/pages/user-management/index' });
     },
     goModelConfig() {
-      this.$router.push('/model-config')
+      uni.navigateTo({ url: '/pages/model-config/index' });
     },
     goParamManagement() {
-      this.$router.push('/params-management')
+      uni.navigateTo({ url: '/pages/params-management/index' });
     },
     goOtaManagement() {
-      this.$router.push('/ota-management')
+      uni.navigateTo({ url: '/pages/ota-management/index' });
     },
     goDictManagement() {
-      this.$router.push('/dict-management')
+      uni.navigateTo({ url: '/pages/dict-management/index' });
     },
-    // 获取用户信息
+    
     fetchUserInfo() {
-      userApi.getUserInfo(({ data }) => {
-        this.userInfo = data.data
-        if (data.data.superAdmin !== undefined) {
-          this.$store.commit('setUserInfo', data.data);
+      userApi.getUserInfo(res => {
+        this.userInfo = res.data.data;
+        if (res.data.data.superAdmin !== undefined) {
+          this.$store.commit('setUserInfo', res.data.data);
         }
-      })
+      });
     },
-
-    // 处理搜索
+    
     handleSearch() {
       const searchValue = this.search.trim();
-
-      // 如果搜索内容为空，触发重置事件
       if (!searchValue) {
         this.$emit('search-reset');
         return;
       }
-
+      
       try {
-        // 创建不区分大小写的正则表达式
         const regex = new RegExp(searchValue, 'i');
-        // 触发搜索事件，将正则表达式传递给父组件
         this.$emit('search', regex);
       } catch (error) {
         console.error('正则表达式创建失败:', error);
-        this.$message.error({
-          message: '搜索关键词格式不正确',
-          showClose: true
+        uni.showToast({
+          title: '搜索关键词格式不正确',
+          icon: 'none'
         });
       }
     },
-    // 显示修改密码弹窗
+    
     showChangePasswordDialog() {
       this.isChangePasswordDialogVisible = true;
     },
-    // 退出登录
+    
     async handleLogout() {
       try {
-        // 调用 Vuex 的 logout action
         await this.logout();
-        this.$message.success({
-          message: '退出登录成功',
-          showClose: true
+        uni.showToast({
+          title: '退出登录成功',
+          icon: 'success'
         });
+        uni.reLaunch({ url: '/pages/login/index' });
       } catch (error) {
         console.error('退出登录失败:', error);
-        this.$message.error({
-          message: '退出登录失败，请重试',
-          showClose: true
+        uni.showToast({
+          title: '退出登录失败，请重试',
+          icon: 'none'
         });
       }
     },
-
-    // 使用 mapActions 引入 Vuex 的 logout action
+    
     ...mapActions(['logout'])
   }
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .header {
   background: #f6fcfe66;
-  border: 1px solid #fff;
-  height: 63px !important;
-  min-width: 900px;
-  /* 设置最小宽度防止过度压缩 */
+  border: 1rpx solid #fff;
+  height: 126rpx !important;
+  min-width: 900rpx;
   overflow: hidden;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.1);
 }
 
 .header-container {
@@ -206,29 +225,29 @@ export default {
   justify-content: space-between;
   align-items: center;
   height: 100%;
-  padding: 0 10px;
+  padding: 0 20rpx;
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-width: 120px;
+  gap: 20rpx;
+  min-width: 240rpx;
 }
 
 .logo-img {
-  width: 42px;
-  height: 42px;
+  width: 84rpx;
+  height: 84rpx;
 }
 
 .brand-img {
-  height: 20px;
+  height: 40rpx;
 }
 
 .header-center {
   display: flex;
   align-items: center;
-  gap: 25px;
+  gap: 50rpx;
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
@@ -237,30 +256,26 @@ export default {
 .header-right {
   display: flex;
   align-items: center;
-  gap: 7px;
-  min-width: 300px;
+  gap: 14rpx;
+  min-width: 600rpx;
   justify-content: flex-end;
 }
 
 .equipment-management {
-  padding: 0 9px;
-  width: px;
-  height: 30px;
-  border-radius: 15px;
+  padding: 0 18rpx;
+  height: 60rpx;
+  border-radius: 30rpx;
   background: #deeafe;
   display: flex;
   justify-content: center;
-  font-size: 14px;
+  font-size: 28rpx;
   font-weight: 500;
-  gap: 7px;
+  gap: 14rpx;
   color: #3d4566;
-  margin-left: 1px;
   align-items: center;
   transition: all 0.3s ease;
   cursor: pointer;
   flex-shrink: 0;
-  /* 防止导航按钮被压缩 */
-  padding: 0px 15px;
 }
 
 .equipment-management.active-tab {
@@ -268,67 +283,97 @@ export default {
   color: #fff !important;
 }
 
-.equipment-management img {
-  width: 15px;
-  height: 13px;
+.equipment-management image {
+  width: 30rpx;
+  height: 26rpx;
 }
 
 .search-container {
-  margin-right: 15px;
-  min-width: 150px;
+  margin-right: 30rpx;
+  min-width: 300rpx;
   flex-grow: 1;
-  max-width: 220px;
-}
-
-.custom-search-input>>>.el-input__inner {
-  height: 30px;
-  border-radius: 15px;
-  background-color: #fff;
-  border: 1px solid #e4e6ef;
-  padding-left: 15px;
-  font-size: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  width: 100%;
-}
-
-.search-icon {
-  cursor: pointer;
-  color: #909399;
-  margin-right: 8px;
-  font-size: 14px;
-  line-height: 30px;
+  max-width: 440rpx;
 }
 
 .avatar-img {
-  width: 21px;
-  height: 21px;
+  width: 42rpx;
+  height: 42rpx;
   flex-shrink: 0;
+  border-radius: 50%;
+  border: 1rpx solid #e4e6ef;
 }
 
 .user-dropdown {
   flex-shrink: 0;
+  position: relative;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  font-size: 28rpx;
+  color: #3d4566;
+  cursor: pointer;
+}
+
+.arrow-icon {
+  font-size: 24rpx;
+  transition: transform 0.3s ease;
+}
+
+.rotate {
+  transform: rotate(180deg);
+}
+
+/* 下拉菜单样式 */
+.more-dropdown {
+  position: relative;
+}
+
+.dropdown-menu, .user-dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: #fff;
+  border-radius: 12rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  padding: 10rpx 0;
+  z-index: 100;
+}
+
+.dropdown-item {
+  padding: 16rpx 30rpx;
+  font-size: 28rpx;
+  color: #606266;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background-color: #f5f7fa;
 }
 
 /* 响应式调整 */
 @media (max-width: 1200px) {
   .header-center {
-    gap: 14px;
+    gap: 28rpx;
   }
 
   .equipment-management {
-    width: 70px;
-    font-size: 9px;
+    width: 140rpx;
+    font-size: 18rpx;
   }
 }
 
 @media (max-width: 1024px) {
   .search-container {
-    margin-right: 10px;
-    max-width: 150px;
+    margin-right: 20rpx;
+    max-width: 300rpx;
   }
 
   .header-right {
-    gap: 5px;
+    gap: 10rpx;
   }
 }
 
@@ -338,53 +383,29 @@ export default {
   }
 
   .search-container {
-    max-width: 150px;
+    max-width: 300rpx;
   }
 }
 
 @media (max-width: 768px) {
   .search-container {
-    max-width: 145px;
-  }
-
-  .custom-search-input>>>.el-input__inner {
-    padding-left: 10px;
-    font-size: 11px;
+    max-width: 290rpx;
   }
 }
 
 @media (max-width: 600px) {
   .search-container {
-    max-width: 120px;
-    min-width: 100px;
+    max-width: 240rpx;
+    min-width: 200rpx;
   }
-}
-
-.equipment-management.more-dropdown {
-  position: relative;
-}
-
-.equipment-management.more-dropdown .el-dropdown-menu {
-  position: absolute;
-  right: 0;
-  min-width: 120px;
-  margin-top: 5px;
-}
-
-.el-dropdown-menu__item {
-  min-width: 60px;
-  padding: 8px 20px;
-  font-size: 14px;
-  color: #606266;
-  white-space: nowrap;
-}
-
-@media (max-width: 768px) {
-  .equipment-management.more-dropdown .el-dropdown-menu {
-    position: fixed;
-    right: 10px;
-    top: 60px;
-    z-index: 2000;
+  
+  .header-center {
+    gap: 16rpx;
+  }
+  
+  .equipment-management {
+    padding: 0 12rpx;
+    font-size: 24rpx;
   }
 }
 </style>

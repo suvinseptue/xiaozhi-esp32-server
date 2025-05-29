@@ -1,10 +1,11 @@
 import { getServiceUrl } from '../api';
 import RequestService from '../httpRequest';
+import { encodeQueryParams } from '@/utils/query-params.js';
 
 export default {
   // 获取模型配置列表
   getModelList(params, callback) {
-    const queryParams = new URLSearchParams({
+    const queryParams = encodeQueryParams({
       modelType: params.modelType,
       modelName: params.modelName || '',
       page: params.page || 0,
@@ -108,7 +109,7 @@ export default {
   },
   // 获取模型音色列表
   getModelVoices(modelId, voiceName, callback) {
-    const queryParams = new URLSearchParams({
+    const queryParams = encodeQueryParams({
       voiceName: voiceName || ''
     }).toString();
     RequestService.sendRequest()

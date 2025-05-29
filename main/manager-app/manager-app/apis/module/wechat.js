@@ -11,11 +11,12 @@ export default {
             .data(loginForm)
             .success((res) => {
                 RequestService.clearRequestTime()
-                callback(res)
+				console.log('请求服务端登录成功:', res.data)
+                callback(res.data)
             })
             .fail(() => {
                 RequestService.reAjaxFun(() => {
-                    this.login(loginForm, callback)
+                    this.login(code, callback)
                 })
             }).send()
     }

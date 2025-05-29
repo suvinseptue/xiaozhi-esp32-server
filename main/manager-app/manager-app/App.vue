@@ -1,10 +1,12 @@
 <script>
 import CacheViewer from '@/components/CacheViewer.vue';
-import { logCacheStatus } from '@/utils/cacheViewer';
+import {logCacheStatus} from '@/utils/cacheViewer';
+import GlobalLoginPopup from '@/components/LoginPopup.vue';
 
 export default {
   components: {
-    CacheViewer
+    CacheViewer,
+    GlobalLoginPopup
   },
   data() {
     return {
@@ -17,27 +19,27 @@ export default {
     if (this.isCDNEnabled) {
       // 添加全局快捷键Alt+C用于显示缓存查看器
       document.addEventListener('keydown', this.handleKeyDown);
-      
+
       // 在全局对象上添加缓存检查方法，便于调试
       window.checkCDNCacheStatus = () => {
         this.showCacheViewer = true;
       };
-      
+
       // 在控制台输出提示信息
       console.info(
-        '%c[小智服务] CDN缓存检查工具已加载', 
-        'color: #409EFF; font-weight: bold;'
+          '%c[小智服务] CDN缓存检查工具已加载',
+          'color: #409EFF; font-weight: bold;'
       );
       console.info(
-        '按下 Alt+C 组合键或在控制台运行 checkCDNCacheStatus() 可以查看CDN缓存状态'
+          '按下 Alt+C 组合键或在控制台运行 checkCDNCacheStatus() 可以查看CDN缓存状态'
       );
-      
+
       // 检查Service Worker状态
       this.checkServiceWorkerStatus();
     } else {
       console.info(
-        '%c[小智服务] CDN模式已禁用，使用本地打包资源', 
-        'color: #67C23A; font-weight: bold;'
+          '%c[小智服务] CDN模式已禁用，使用本地打包资源',
+          'color: #67C23A; font-weight: bold;'
       );
     }
   },
@@ -61,24 +63,24 @@ export default {
           const registrations = await navigator.serviceWorker.getRegistrations();
           if (registrations.length > 0) {
             console.info(
-              '%c[小智服务] Service Worker已注册', 
-              'color: #67C23A; font-weight: bold;'
+                '%c[小智服务] Service Worker已注册',
+                'color: #67C23A; font-weight: bold;'
             );
-            
+
             // 输出缓存状态到控制台
             setTimeout(async () => {
               const hasCaches = await logCacheStatus();
               if (!hasCaches) {
                 console.info(
-                  '%c[小智服务] 还未检测到缓存，请刷新页面或等待缓存建立', 
-                  'color: #E6A23C; font-weight: bold;'
+                    '%c[小智服务] 还未检测到缓存，请刷新页面或等待缓存建立',
+                    'color: #E6A23C; font-weight: bold;'
                 );
-                
+
                 // 开发环境下提供额外提示
                 if (process.env.NODE_ENV === 'development') {
                   console.info(
-                    '%c[小智服务] 在开发环境中，Service Worker可能无法正常初始化缓存',
-                    'color: #E6A23C; font-weight: bold;'
+                      '%c[小智服务] 在开发环境中，Service Worker可能无法正常初始化缓存',
+                      'color: #E6A23C; font-weight: bold;'
                   );
                   console.info('请尝试以下方法检查Service Worker是否生效:');
                   console.info('1. 在开发者工具的Application/Application标签页中查看Service Worker状态');
@@ -89,14 +91,14 @@ export default {
             }, 2000);
           } else {
             console.info(
-              '%c[小智服务] Service Worker未注册，CDN资源可能无法缓存', 
-              'color: #F56C6C; font-weight: bold;'
+                '%c[小智服务] Service Worker未注册，CDN资源可能无法缓存',
+                'color: #F56C6C; font-weight: bold;'
             );
-            
+
             if (process.env.NODE_ENV === 'development') {
               console.info(
-                '%c[小智服务] 在开发环境中，这是正常现象',
-                'color: #E6A23C; font-weight: bold;'
+                  '%c[小智服务] 在开发环境中，这是正常现象',
+                  'color: #E6A23C; font-weight: bold;'
               );
               console.info('Service Worker通常只在生产环境中生效');
               console.info('要测试Service Worker功能:');
@@ -117,13 +119,14 @@ export default {
 
 <template>
   <div id="app">
-    <router-view />
-    <cache-viewer v-if="isCDNEnabled" :visible.sync="showCacheViewer" />
+    <router-view/>
+    <cache-viewer v-if="isCDNEnabled" :visible.sync="showCacheViewer"/>
   </div>
+  <GlobalLoginPopup />
 </template>
 
 <style lang="scss">
-	/*每个页面公共css */	
+/*每个页面公共css */
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;

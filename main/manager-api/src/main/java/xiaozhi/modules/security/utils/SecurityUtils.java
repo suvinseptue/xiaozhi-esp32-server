@@ -13,6 +13,6 @@ public class SecurityUtils {
      * 校验平台
      */
     public static boolean isInnerUser(SysUserDTO userDTO) {
-        return !PlatformEnum.Wechat.equals(userDTO.getPlatform());
+        return !PlatformEnum.Wechat.getCode().equals(userDTO.getPlatform());
     }
 }

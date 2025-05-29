@@ -9,9 +9,9 @@ import lombok.Data;
  **/
 @Data
 public class AccessTokenResponse {
-    private String accessToken;  // 接口调用凭证
-    private String openid;        // 用户唯一标识
-    private Integer expiresIn;   // 凭证有效期（秒）
-    private String errcode;       // 错误码（0 表示成功）
-    private String errmsg;        // 错误信息
+    private String session_key;        //会话密钥
+    private String unionid;        //用户在开放平台的唯一标识符，若当前小程序已绑定到微信开放平台帐号下会返回，详见 UnionID 机制说明。
+    private String errmsg;        //错误信息，请求失败时返回
+    private String openid;        //用户唯一标识
+    private String errcode;        //错误码，请求失败时返回
 }

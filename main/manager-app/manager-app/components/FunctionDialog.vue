@@ -1,410 +1,459 @@
 <template>
-  <el-drawer :visible.sync="dialogVisible" direction="rtl" size="50%" :wrapperClosable="false" :withHeader="false">
-    <!-- 自定义标题区域 -->
-    <div class="custom-header">
-      <div class="header-left">
-        <h3 class="bold-title">功能管理</h3>
-      </div>
-      <button class="custom-close-btn" @click="closeDialog">×</button>
-    </div>
+  <!-- 抽屉容器（使用 uni-popup 实现右侧弹出） -->
+  <uni-popup 
+    v-model="dialogVisible" 
+    type="right" 
+    :mask="false" 
+    :duration="300"
+    :custom-style="{ width: '90%', maxWidth: '680rpx' }"
+  >
+    <!-- 自定义标题栏 -->
+    <view class="custom-header">
+      <view class="header-left">
+        <text class="bold-title">功能管理</text>
+      </view>
+      <view class="custom-close-btn" @tap="closeDialog">×</view>
+    </view>
 
-    <div class="function-manager">
-      <!-- 左侧：未选功能 -->
-      <div class="function-column">
-        <div class="column-header">
-          <h4 class="column-title">未选功能</h4>
-          <el-button type="text" @click="selectAll" class="select-all-btn">全选</el-button>
-        </div>
-        <div class="function-list">
-          <div v-for="func in unselected" :key="func.name" class="function-item">
-            <el-checkbox :label="func.name" v-model="selectedNames" @change="(val) => handleCheckboxChange(func, val)" @click.native.stop></el-checkbox>
-            <div class="func-tag" @click="handleFunctionClick(func)">
-              <div class="color-dot" :style="{backgroundColor: getFunctionColor(func.name)}"></div>
-              <span>{{ func.name }}</span>
-            </div>
-            <el-tooltip class="item" effect="dark" :content="func.description || '暂无功能描述'" placement="top">
-              <img src="@/assets/home/info.png" alt="" class="info-icon">
-            </el-tooltip>
-          </div>
-        </div>
-      </div>
+    <!-- 主体内容区域 -->
+    <view class="function-container">
+      <!-- 未选/已选功能列（双列布局） -->
+      <view class="function-columns">
+        <!-- 未选功能 -->
+        <view class="function-column">
+          <view class="column-header">
+            <text class="column-title">未选功能</text>
+            <text @tap="selectAll" class="select-all-btn">全选</text>
+          </view>
+          <scroll-view 
+            class="function-list" 
+            scroll-y 
+            :style="{ height: `${listHeight}rpx` }"
+          >
+            <view 
+              v-for="func in unselected" 
+              :key="func.name" 
+              class="function-item"
+            >
+              <!-- 复选框 -->
+              <uni-checkbox 
+                :value="func.name" 
+                v-model="selectedNames"
+                @change="(e) => onCheckboxChange(func, e.mp.detail.value.includes(func.name))"
+              />
+              <!-- 功能标签（带颜色点） -->
+              <view class="func-tag" @tap="onFunctionClick(func)">
+                <view 
+                  class="color-dot" 
+                  :style="{ backgroundColor: getFunctionColor(func.name) }"
+                ></view>
+                <text>{{ func.name }}</text>
+              </view>
+              <!-- 提示图标 -->
+              <uni-tooltip 
+                :content="func.description || '暂无功能描述'" 
+                placement="top"
+              >
+                <image 
+                  src="/static/home/info.png" 
+                  mode="aspectFit" 
+                  class="info-icon"
+                ></image>
+              </uni-tooltip>
+            </view>
+          </scroll-view>
+        </view>
 
-      <!-- 中间：已选功能 -->
-      <div class="function-column">
-        <div class="column-header">
-          <h4 class="column-title">已选功能</h4>
-          <el-button type="text" @click="deselectAll" class="select-all-btn">全选</el-button>
-        </div>
-        <div class="function-list">
-          <div v-for="func in selectedList" :key="func.name" class="function-item">
-            <el-checkbox :label="func.name" v-model="selectedNames" @change="(val) => handleCheckboxChange(func, val)" @click.native.stop></el-checkbox>
-            <div class="func-tag" @click="handleFunctionClick(func)">
-              <div class="color-dot" :style="{backgroundColor: getFunctionColor(func.name)}"></div>
-              <span>{{ func.name }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
+        <!-- 已选功能 -->
+        <view class="function-column">
+          <view class="column-header">
+            <text class="column-title">已选功能</text>
+            <text @tap="deselectAll" class="select-all-btn">全选</text>
+          </view>
+          <scroll-view 
+            class="function-list" 
+            scroll-y 
+            :style="{ height: `${listHeight}rpx` }"
+          >
+            <view 
+              v-for="func in selectedList" 
+              :key="func.name" 
+              class="function-item"
+            >
+              <uni-checkbox 
+                :value="func.name" 
+                v-model="selectedNames"
+                @change="(e) => onCheckboxChange(func, e.mp.detail.value.includes(func.name))"
+              />
+              <view class="func-tag" @tap="onFunctionClick(func)">
+                <view 
+                  class="color-dot" 
+                  :style="{ backgroundColor: getFunctionColor(func.name) }"
+                ></view>
+                <text>{{ func.name }}</text>
+              </view>
+            </view>
+          </scroll-view>
+        </view>
+      </view>
 
-      <!-- 右侧：参数配置 -->
-      <div class="params-column">
-        <h4 v-if="currentFunction" class="column-title">参数配置 - {{ currentFunction.name }}</h4>
-          <div v-if="currentFunction" class="params-container">
-            <el-form :model="currentFunction" size="mini" class="param-form" v-loading="loading" element-loading-text="拼命加载中" element-loading-spinner="el-icon-loading" element-loading-background="rgba(255, 255, 255, 0.7)">
-              <el-form-item v-for="(value, key) in currentFunction.params" :key="key" :label="key" class="param-item">
-                <el-input v-model="currentFunction.params[key]" size="mini" class="param-input" @change="(val) => handleParamChange(currentFunction, key, val)"/>
-              </el-form-item>
-            </el-form>
-          </div>
-        <div v-else class="empty-tip">请选择已配置的功能进行参数设置</div>
-      </div>
-    </div>
+      <!-- 参数配置区 -->
+      <view class="params-section">
+        <text v-if="currentFunction" class="section-title">参数配置 - {{ currentFunction.name }}</text>
+        <view v-if="currentFunction" class="params-form">
+          <view 
+            v-for="(val, key) in currentFunction.params" 
+            :key="key" 
+            class="param-item"
+          >
+            <text class="param-label">{{ key }}</text>
+            <uni-easyinput 
+              v-model="currentFunction.params[key]" 
+              type="text"
+              class="param-input"
+              @input="(e) => onParamChange(currentFunction, key, e.mp.detail.value)"
+            />
+          </view>
+        </view>
+        <view v-else class="empty-tip">请选择已配置的功能进行参数设置</view>
+      </view>
+    </view>
 
-    <div class="drawer-footer">
-      <el-button @click="closeDialog">取消</el-button>
-      <el-button type="primary" @click="saveSelection">保存配置</el-button>
-    </div>
-  </el-drawer>
+    <!-- 底部操作栏 -->
+    <view class="footer-actions">
+      <uni-button type="default" @tap="closeDialog">取消</uni-button>
+      <uni-button type="primary" @tap="saveConfig">保存配置</uni-button>
+    </view>
+  </uni-popup>
 </template>
 
-<script>
-export default {
-  props: {
-    value: Boolean,
-    functions: {
-      type: Array,
-      default: () => []
-    }
-  },
-  data() {
-    return {
-      dialogVisible: this.value,
-      selectedNames: [],
-      currentFunction: null,
-      modifiedFunctions: {},
-      allFunctions: [
-        {name: '天气', params: {city: '北京'}, description: '查看指定城市的天气情况'},
-        {name: '新闻', params: {type: '科技'}, description: '获取最新科技类新闻资讯'},
-        {name: '工具', params: {category: '常用'}, description: '提供常用工具集合'},
-        {name: '退出', params: {}, description: '退出当前系统'},
-        {name: '音乐', params: {genre: '流行'}, description: '播放流行音乐'},
-        {name: '翻译', params: {from: '中文', to: '英文'}, description: '提供中英文互译功能'},
-        {name: '计算', params: {precision: '2'}, description: '提供精确计算功能'},
-        {name: '日历', params: {view: '月'}, description: '查看月历视图'}
-      ],
-      functionColorMap: [
-        '#FF6B6B', '#4ECDC4', '#45B7D1',
-        '#96CEB4', '#FFEEAD', '#D4A5A5', '#A2836E'
-      ],
-      tempFunctions: {},
-      // 添加一个标志位来跟踪是否已经保存
-      hasSaved: false,
-      loading: false,
-    }
-  },
-  computed: {
-    selectedList() {
-      return this.allFunctions.filter(f => this.selectedNames.includes(f.name));
-    },
-    unselected() {
-      return this.allFunctions.filter(f => !this.selectedNames.includes(f.name));
-    }
-  },
-  watch: {
-    value(newVal) {
-      this.dialogVisible = newVal;
-      if (newVal) {
-        this.selectedNames = this.functions.map(f => f.name);
-        this.currentFunction = this.selectedList[0] || null;
-      }
-    },
-    dialogVisible(newVal) {
-      this.$emit('input', newVal);
-    }
-  },
-  methods: {
-    handleFunctionClick(func) {
-      if (this.selectedNames.includes(func.name)) {
-        this.loading = true;
-        setTimeout(() => {
-          const tempFunc = this.tempFunctions[func.name];
-          this.currentFunction = tempFunc ? tempFunc : JSON.parse(JSON.stringify(func));
-          this.loading = false;
-        }, 300);
-      }
-    },
-    handleParamChange(func, key, value) {
-      if (!this.tempFunctions[func.name]) {
-        this.tempFunctions[func.name] = JSON.parse(JSON.stringify(func));
-      }
-      this.tempFunctions[func.name].params[key] = value;
-    },
-    handleCheckboxChange(func, checked) {
-      if (checked) {
-        if (!this.selectedNames.includes(func.name)) {
-          this.selectedNames = [...this.selectedNames, func.name];
-        }
-      } else {
-        this.selectedNames = this.selectedNames.filter(name => name !== func.name);
-      }
+<script setup>
+import { ref, computed, watch } from 'vue';
 
-      if (this.selectedList.length > 0) {
-        this.currentFunction = this.selectedList[0];
-      } else {
-        this.currentFunction = null;
-      }
-    },
+// 获取设备信息（计算滚动区域高度）
+const { screenHeight } = uni.getSystemInfoSync();
+const listHeight = ref(screenHeight * 2 - 400); // 转换为rpx（1rpx=0.5px）
 
-    selectAll() {
-      this.selectedNames = [...this.allFunctions.map(f => f.name)];
-      if (this.selectedList.length > 0) {
-        this.currentFunction = JSON.parse(JSON.stringify(this.selectedList[0]));
-      }
-    },
-
-    deselectAll() {
-      this.selectedNames = [];
-      this.currentFunction = null;
-    },
-
-    closeDialog() {
-      this.tempFunctions = {};
-      this.selectedNames = this.functions.map(f => f.name);
-      this.currentFunction = null;
-      this.dialogVisible = false;
-      this.$emit('input', false);
-      this.$emit('dialog-closed', false);
-    },
-
-    saveSelection() {
-      Object.keys(this.tempFunctions).forEach(name => {
-        this.modifiedFunctions[name] = JSON.parse(JSON.stringify(this.tempFunctions[name]));
-      });
-      this.tempFunctions = {};
-      this.hasSaved = true;
-
-      const selected = this.selectedList.map(f => {
-        const modified = this.modifiedFunctions[f.name];
-        return modified || f;
-      }).map(f => ({
-        ...f,
-        params: JSON.parse(JSON.stringify(f.params))
-      }));
-
-      this.$emit('update-functions', selected);
-      this.dialogVisible = false;
-      this.$message.success('配置保存成功');
-      // 通知父组件对话框已关闭且已保存
-      this.$emit('dialog-closed', true);
-    },
-
-    getFunctionColor(name) {
-      const hash = [...name].reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      return this.functionColorMap[hash % 7];
-    }
+// 组件参数（父组件控制显隐 + 已选功能列表）
+const props = defineProps({
+  visible: Boolean, // 控制抽屉显隐
+  selectedFunctions: { // 父组件传入的已选功能列表
+    type: Array,
+    default: () => []
   }
-}
+});
+
+// 事件（通知父组件状态变化）
+const emit = defineEmits([
+  'update:visible', // 显隐状态变化
+  'save', // 保存配置
+  'close' // 关闭抽屉
+]);
+
+// 响应式数据
+const dialogVisible = ref(props.visible);
+const selectedNames = ref(props.selectedFunctions.map(f => f.name)); // 已选功能名称
+const currentFunction = ref(null); // 当前选中功能（用于参数配置）
+const tempParams = ref({}); // 临时修改的参数（未保存时暂存）
+
+// 模拟功能列表（实际项目中可通过接口获取）
+const allFunctions = ref([
+  {name: '天气', params: {city: '北京'}, description: '查看指定城市的天气情况'},
+  {name: '新闻', params: {type: '科技'}, description: '获取最新科技类新闻资讯'},
+  {name: '工具', params: {category: '常用'}, description: '提供常用工具集合'},
+  {name: '退出', params: {}, description: '退出当前系统'},
+  {name: '音乐', params: {genre: '流行'}, description: '播放流行音乐'},
+  {name: '翻译', params: {from: '中文', to: '英文'}, description: '提供中英文互译功能'},
+  {name: '计算', params: {precision: '2'}, description: '提供精确计算功能'},
+  {name: '日历', params: {view: '月'}, description: '查看月历视图'}
+]);
+
+// 颜色映射（根据功能名称生成不同颜色）
+const colorList = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#D4A5A5', '#A2836E'];
+const getFunctionColor = (name) => {
+  const hash = [...name].reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  return colorList[hash % colorList.length];
+};
+
+// 计算属性：已选/未选功能列表
+const selectedList = computed(() => 
+  allFunctions.value.filter(f => selectedNames.value.includes(f.name))
+);
+const unselected = computed(() => 
+  allFunctions.value.filter(f => !selectedNames.value.includes(f.name))
+);
+
+// 监听父组件传入的 visible 变化
+watch(() => props.visible, (newVal) => {
+  dialogVisible.value = newVal;
+  if (newVal) {
+    // 重置临时参数（避免上次修改残留）
+    tempParams.value = {};
+    // 同步已选功能名称
+    selectedNames.value = props.selectedFunctions.map(f => f.name);
+    // 默认选中第一个已选功能
+    currentFunction.value = selectedList.value[0] ? JSON.parse(JSON.stringify(selectedList.value[0])) : null;
+  }
+});
+
+// 监听 dialogVisible 变化并通知父组件
+watch(dialogVisible, (newVal) => {
+  emit('update:visible', newVal);
+});
+
+// 复选框选择/取消选择功能
+const onCheckboxChange = (func, isChecked) => {
+  if (isChecked) {
+    if (!selectedNames.value.includes(func.name)) {
+      selectedNames.value.push(func.name);
+    }
+  } else {
+    selectedNames.value = selectedNames.value.filter(name => name !== func.name);
+  }
+  // 更新当前选中功能（若已选列表为空则置空）
+  currentFunction.value = selectedList.value[0] ? JSON.parse(JSON.stringify(selectedList.value[0])) : null;
+};
+
+// 点击功能项（查看/编辑参数）
+const onFunctionClick = (func) => {
+  if (selectedNames.value.includes(func.name)) {
+    // 从临时参数或原始数据中获取当前功能的参数
+    currentFunction.value = tempParams.value[func.name] || JSON.parse(JSON.stringify(func));
+  }
+};
+
+// 参数修改时暂存修改
+const onParamChange = (func, key, value) => {
+  if (!tempParams.value[func.name]) {
+    tempParams.value[func.name] = JSON.parse(JSON.stringify(func));
+  }
+  tempParams.value[func.name].params[key] = value;
+};
+
+// 全选未选功能
+const selectAll = () => {
+  selectedNames.value = allFunctions.value.map(f => f.name);
+  currentFunction.value = selectedList.value[0] ? JSON.parse(JSON.stringify(selectedList.value[0])) : null;
+};
+
+// 全不选已选功能
+const deselectAll = () => {
+  selectedNames.value = [];
+  currentFunction.value = null;
+};
+
+// 关闭抽屉（重置状态）
+const closeDialog = () => {
+  dialogVisible.value = false;
+  tempParams.value = {};
+  emit('close');
+};
+
+// 保存配置（通知父组件）
+const saveConfig = () => {
+  // 合并临时修改和原始数据
+  const finalSelected = selectedList.value.map(func => {
+    const modified = tempParams.value[func.name];
+    return modified || func;
+  });
+  // 通知父组件保存
+  emit('save', finalSelected);
+  // 关闭抽屉并提示
+  dialogVisible.value = false;
+  uni.showToast({ title: '配置保存成功', icon: 'success' });
+};
 </script>
 
-<style lang="scss" scoped>
-.function-manager {
-  display: grid;
-  grid-template-columns: minmax(120px, 0.5fr) minmax(120px, 0.5fr) minmax(200px, 2fr);
-  gap: 12px;
-  height: calc(70vh - 60px);
+<style scoped lang="scss">
+/* 整体布局 */
+.function-container {
+  padding: 30rpx;
+  height: calc(100vh - 160rpx); /* 留出标题和底部操作栏空间 */
 }
 
+/* 标题栏 */
 .custom-header {
-  position: relative;
+  padding: 40rpx 30rpx;
+  border-bottom: 2rpx solid #f0f0f0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 24px;
-  border-bottom: 1px solid #EBEEF5;
-
-  .header-left {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
 
   .bold-title {
-    font-size: 18px;
+    font-size: 36rpx;
     font-weight: bold;
-    margin: 0;
+    color: #333;
   }
 
-  .select-all-btn {
-    padding: 0;
-    height: auto;
-    font-size: 14px;
-  }
-}
-
-.function-column {
-  position: relative;
-  width: auto;
-  padding: 10px;
-  overflow-y: auto;
-  border-right: 1px solid #EBEEF5;
-  scrollbar-width: none;
-}
-
-.function-column::-webkit-scrollbar {
-  display: none;
-}
-
-.function-list {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.function-item {
-  padding: 8px 12px;
-  margin: 4px 0;
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  &:hover {
-    background-color: #f5f7fa;
+  .custom-close-btn {
+    width: 60rpx;
+    height: 60rpx;
+    border: 2rpx solid #ddd;
+    border-radius: 50%;
+    color: #999;
+    font-size: 50rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
   }
 }
 
-.params-column {
-  min-width: 280px;
-  padding: 10px;
-  overflow-y: auto;
-  scrollbar-width: none;
-}
-
-.params-column::-webkit-scrollbar {
-  display: none;
-}
-
-.column-header {
+/* 功能列（未选/已选） */
+.function-columns {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
+  gap: 30rpx;
+  margin-bottom: 40rpx;
+
+  .function-column {
+    flex: 1;
+    max-width: 50%;
+
+    .column-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20rpx;
+
+      .column-title {
+        font-size: 30rpx;
+        color: #666;
+        font-weight: 500;
+      }
+
+      .select-all-btn {
+        font-size: 28rpx;
+        color: #5778ff;
+      }
+    }
+
+    .function-list {
+      border-radius: 16rpx;
+      background: #f8f9fd;
+      padding: 20rpx;
+    }
+
+    .function-item {
+      display: flex;
+      align-items: center;
+      gap: 20rpx;
+      padding: 16rpx;
+      border-radius: 12rpx;
+      transition: background 0.2s;
+
+      &:hover {
+        background: #e6ebff;
+      }
+    }
+  }
 }
 
-.column-title {
-  text-align: center;
-  width: 100%;
-}
-
+/* 功能标签（带颜色点） */
 .func-tag {
   display: flex;
   align-items: center;
-  cursor: pointer;
   flex-grow: 1;
-  margin-left: 8px;
+
+  .color-dot {
+    width: 16rpx;
+    height: 16rpx;
+    border-radius: 50%;
+    margin-right: 16rpx;
+  }
+
+  text {
+    font-size: 28rpx;
+    color: #333;
+  }
 }
 
-.color-dot {
-  flex-shrink: 0;
-  width: 8px;
-  height: 8px;
-  margin-right: 8px;
-  border-radius: 50%;
+/* 提示图标 */
+.info-icon {
+  width: 32rpx;
+  height: 32rpx;
+  opacity: 0.7;
 }
 
-.param-form {
-  ::v-deep .el-form-item {
+/* 参数配置区 */
+.params-section {
+  background: #f8f9fd;
+  border-radius: 16rpx;
+  padding: 20rpx;
+
+  .section-title {
+    font-size: 30rpx;
+    color: #333;
+    font-weight: 500;
+    margin-bottom: 20rpx;
+  }
+
+  .params-form {
     display: flex;
-    align-items: center;
-    margin-bottom: 12px;
+    flex-direction: column;
+    gap: 20rpx;
+  }
 
-    .el-form-item__label {
-      font-size: 14px !important;
-      color: #606266;
-      text-align: left;
-      padding-right: 10px;
-      flex-shrink: 0;
-      width: auto !important;
+  .param-item {
+    display: flex;
+    flex-direction: column;
+    gap: 12rpx;
+
+    .param-label {
+      font-size: 28rpx;
+      color: #666;
     }
 
-    .el-form-item__content {
-      margin-left: 0 !important;
-      flex-grow: 1;
-
-      .el-input__inner {
-        text-align: left;
-        padding-left: 8px;
-        width: 100%;
-      }
+    .param-input {
+      height: 68rpx;
+      padding: 0 20rpx;
+      border: 2rpx solid #e4e6ef;
+      border-radius: 12rpx;
+      font-size: 28rpx;
+      background: #fff;
     }
   }
 }
 
-.params-container {
-  padding: 16px;
-  border-radius: 4px;
-  min-width: 280px;
-}
-
+/* 空提示 */
 .empty-tip {
-  padding: 20px;
-  color: #909399;
+  padding: 40rpx;
+  font-size: 28rpx;
+  color: #999;
   text-align: center;
 }
 
-.param-input {
-  width: 100%;
-}
-
-.drawer-footer {
+/* 底部操作栏 */
+.footer-actions {
   position: absolute;
   bottom: 0;
-  width: 100%;
-  border-top: 1px solid #e8e8e8;
-  padding: 10px 16px;
-  text-align: center;
+  left: 0;
+  right: 0;
+  padding: 30rpx;
+  border-top: 2rpx solid #f0f0f0;
   background: #fff;
-}
-
-.info-icon {
-  width: 16px;
-  height: 16px;
-  margin-right: 1vh;
-}
-
-.custom-close-btn {
-  position: absolute;
-  top: 50%;
-  right: 10px;
-  transform: translateY(-50%);
-  width: 35px;
-  height: 35px;
-  border-radius: 50%;
-  border: 2px solid #cfcfcf;
-  background: none;
-  font-size: 30px;
-  font-weight: lighter;
-  color: #cfcfcf;
-  cursor: pointer;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1;
-  padding: 0;
-  outline: none;
-  transition: all 0.3s;
+  gap: 30rpx;
+
+  uni-button {
+    flex: 1;
+    height: 88rpx;
+    font-size: 32rpx;
+    border-radius: 44rpx;
+  }
+
+  .uni-button-primary {
+    background: #5778ff;
+  }
 }
 
-.custom-close-btn:hover {
-  color: #409EFF;
-  border-color: #409EFF;
+/* 复选框样式覆盖 */
+::v-deep .uni-checkbox-input {
+  width: 36rpx;
+  height: 36rpx;
 }
 
-::v-deep .el-checkbox__label {
-  display: none;
+::v-deep .uni-checkbox-input-checked {
+  background: #5778ff;
+  border-color: #5778ff;
 }
 </style>

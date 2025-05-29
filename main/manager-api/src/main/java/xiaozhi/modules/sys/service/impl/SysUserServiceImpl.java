@@ -73,12 +73,13 @@ public class SysUserServiceImpl extends BaseServiceImpl<SysUserDao, SysUserEntit
     public void save(SysUserDTO dto) {
         SysUserEntity entity = ConvertUtils.sourceToTarget(dto, SysUserEntity.class);
 
-        // 密码强度
-        if (!isStrongPassword(entity.getPassword())) {
-            throw new RenException(ErrorCode.PASSWORD_WEAK_ERROR);
-        }
 
         if (SecurityUtils.isInnerUser(dto)) {
+            // 密码强度
+            if (!isStrongPassword(entity.getPassword())) {
+                throw new RenException(ErrorCode.PASSWORD_WEAK_ERROR);
+            }
+
             // 密码加密
             String password = PasswordUtils.encode(entity.getPassword());
             entity.setPassword(password);
