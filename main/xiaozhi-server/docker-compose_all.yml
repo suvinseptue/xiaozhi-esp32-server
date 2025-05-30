@@ -40,6 +40,8 @@ services:
     ports:
       # 智控台
       - "8002:8002"
+      - "80:80"
+      - "443:443"
     environment:
       - TZ=Asia/Shanghai
       - SPRING_DATASOURCE_DRUID_URL=jdbc:mysql://xiaozhi-esp32-server-db:3306/xiaozhi_esp32_server?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true&connectTimeout=30000&socketTimeout=30000&autoReconnect=true&failOverReadOnly=false&maxReconnects=10
