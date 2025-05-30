@@ -35,6 +35,8 @@ COPY --from=api-builder /app/target/xiaozhi-esp32-api.jar /app/xiaozhi-esp32-api
 
 # 暴露端口
 EXPOSE 8002
+EXPOSE 80
+EXPOSE 443
 
 # 启动脚本
 COPY docs/docker/start.sh /start.sh
