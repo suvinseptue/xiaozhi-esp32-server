@@ -24,6 +24,8 @@ RUN apt-get update && \
 
 # 配置Nginx
 COPY docs/docker/nginx.conf /etc/nginx/nginx.conf
+COPY docs/docker/ppfans.xyz.key /etc/nginx/cert/ppfans.xyz.key
+COPY docs/docker/ppfans.xyz.pem /etc/nginx/cert/ppfans.xyz.pem
 
 # 复制前端构建产物
 COPY --from=web-builder /app/dist /usr/share/nginx/html
